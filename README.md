@@ -1,4 +1,4 @@
-# Task Report Todoist
+# Todoist Analytics
 <b>
 If you use Todoist for daily, monthly, yearly planning you should try this tool.
 </b>
