@@ -10,6 +10,4 @@ If you're not sure about how to properly use todoist for task planning check out
 
 # Usage
 
-V0 -> Download you last backup and save it somewhere.
-
-V1 -> Allow this tool to call your todoist API.
+V0 -> Allow this tool to call your todoist API.
