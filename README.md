@@ -1,6 +1,6 @@
 # Todoist Analytics
 <b>
-If you use Todoist for daily, monthly, yearly planning you should try this tool.
+If you use Todoist for daily, weekly, monthly or yearly planning you should try this tool.
 </b>
 
 The main goal for this tool is to help you keep track and create analytics based on your data from todoist.
