@@ -5,9 +5,10 @@ import os
 import json
 import requests
 import todoist
+from credentials import token
 from todoist.managers.completed import CompletedManager
 
-api = todoist.TodoistAPI('0e15b5c23f98650afdc489f0c1c13425a9c50634')
+api = todoist.TodoistAPI(token)
 api.sync()
 
 parsed = api.completed.get_all()
