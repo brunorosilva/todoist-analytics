@@ -22,41 +22,41 @@ class data_collector():
 
     def tasks_to_dataframe(self, items):
         df_tasks = pd.DataFrame()
-        for item in items:
-            df_task = pd.DataFrame({
-            "added_by_uid": item['added_by_uid'],
-            "assigned_by_uid": item['assigned_by_uid'],
-            "checked": item['checked'],
-            "child_order": item['child_order'],
-            "collapsed": item['collapsed'],
-            "content": item['content'],
-            "date_added": item['date_added'],
-            "date_completed": item['date_completed'],
-            "day_order": item['day_order'],
-            "due": item['due'],
-            "has_more_notes": item['has_more_notes'],
-            "id": item['id'],
-            "in_history": item['in_history'],
-            "is_deleted": item['is_deleted'],
-            "labels": item['labels'],
-            "parent_id": item['parent_id'],
-            "priority": item['priority'],
-            "project_id": item['project_id'],
-            "responsible_uid": item['responsible_uid'],
-            "section_id": item['section_id'],
-            "sync_id": item['sync_id'],
-            "user_id": item['user_id']})
-            df_tasks = df_tasks.append(df_task, ignore_index=True)
-        return df_tasks
+        df_dues = pd.DataFrame()
+        i = 0
+        for item_i in items:
+            
+            item = item_i.data # getting the data as a dictionary
+            try:
+                #print(item['due'])
+                df_due = pd.DataFrame(item['due'], index=[0]) # due date is a dict
+            except:
+                
+                df_due = pd.DataFrame({
+                    'date': [0], 
+                    'is_recurring': [0], 
+                    'lang': [0], 
+                    'string': [0], 
+                    'timezone': [0]
+                })
+            
+            df_due['id'] =  item['id'] # id associated with this task and due date
+            item.pop('due') # removing due date from the full dict
+            item.pop('labels') # removing the labels from the full dict
+            # this is kind of ugly, maybe worth looking into it sometime (it works)
+            
+            df_tasks = df_tasks.append(pd.DataFrame(item, index=[0]), ignore_index=True)
+            df_dues = df_dues.append(df_due, ignore_index=True)
+
+        return df_tasks, df_dues
 
     def get_done_tasks(self, start_time=0, end_time=datetime.now()):
+
+        items = self.api["items"]
+        df_full, df_dues = self.tasks_to_dataframe(items)
         
-        df_tasks = tasks_to_dataframe(self.api["items"])
-
-
-
-        print(pd.DataFrame(tasks_dict))
-
-
+        print(df_full.id.unique())
+        
+        
 dc = data_collector(token)
 dc.get_done_tasks()
