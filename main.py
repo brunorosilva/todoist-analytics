@@ -54,9 +54,9 @@ class data_collector():
 
         items = self.api["items"]
         df_full, df_dues = self.tasks_to_dataframe(items)
-        
-        print(df_full.id.unique())
-        
+        return df_full, df_dues
         
 dc = data_collector(token)
-dc.get_done_tasks()
+df_full, df_dues = dc.get_done_tasks()
+df_full.to_csv("sample_data/tasks_{}.csv".format(datetime.today()))
+df_dues.to_csv("sample_data/dues{}.csv".format(datetime.today()))

@@ -8,10 +8,10 @@ The main goal for this tool is to help you keep track and create analytics based
 ## TODO TEMPLATES
 If you're not sure about how to properly use todoist for task planning check out this template (TO BE DONE)
 
-## Part 1: Getting the data (current)
+## Part 1: Getting the data -> Done
 Create an application that calls the Todoist API and gets all done and tbd tasks from an user
 
-## Part 2: Analyse the data from last week
+## Part 2: Analyse the data from last week (Current)
 From the gattered data create a dashboard with info from the user's last week plus some insights
 
 ## Part 3: Saving the data for long term analytics

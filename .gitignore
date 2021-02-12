@@ -1,2 +1,8 @@
 
+/sample_data
+/ipynb_checkpoints
 credentials.py
+dues.csv
+tasks.csv
+Exploratory.ipynb
+.ipynb_checkpoints/Exploratory-checkpoint.ipynb
