@@ -1,7 +1,15 @@
 # Todoist Analytics
+
+![version](https://img.shields.io/badge/version-0.0.1-brightgreen)
+
 <b>
 If you use Todoist for daily, weekly, monthly or yearly planning you should try this tool.
 </b>
+
+This is how the current version of the tool looks like.
+
+<img src='images/dashboard_sample.png'>
+
 
 The main goal for this tool is to help you keep track and create analytics based on your data from todoist.
 
@@ -23,4 +31,4 @@ From the saved data create a personalized insights page for you (:
 
 # Usage
 
-V0 -> Allow this tool to call your todoist API.
+V0 -> Allow this tool to call your todoist API. I'll make a tutorial on how to get your token.
