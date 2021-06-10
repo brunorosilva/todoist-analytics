@@ -82,6 +82,9 @@ class data_collector():
         self.df_full['datehour_completed'] = pd.to_datetime(self.df_full['date_completed'])
         self.df_full['datehour_completed'] = pd.DatetimeIndex(self.df_full['datehour_completed']).tz_convert(None)
 
+        self.df_dues.to_csv("../sample_data/dues.csv", index=False)
+        self.df_projects.to_csv("../sample_data/projects.csv", index=False)
+        self.df_full.to_csv("../sample_data/tasks.csv", index=False)
     def collect(self):
         self._preprocess()
 

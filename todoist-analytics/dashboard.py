@@ -14,7 +14,7 @@ df_full = dc.collect()
 df_full['datehour_completed'] = pd.to_datetime(df_full['date_completed'])
 df_full['datehour_completed'] = pd.DatetimeIndex(df_full['datehour_completed']).tz_convert(None)
 
-filtered_df = df_full[df_full['datehour_completed'] >= datetime.today() - timedelta(days=date_to_filter)]
+filtered_df = df_full.loc[df_full['datehour_completed'] >= datetime.today() - timedelta(days=date_to_filter)]
 filtered_df['date_completed'] = pd.to_datetime(filtered_df['datehour_completed']).dt.date
 filtered_df['date_completed_weekday'] = pd.to_datetime(filtered_df['datehour_completed']).dt.day_name()
 
@@ -26,7 +26,6 @@ st.markdown(f"a grand total of {filtered_df.id.nunique()} completed tasks in {fi
 
 df_all_g = filtered_df[['date_completed', 'project-id', 'id', 'content']].groupby(['date_completed'], as_index=False).nunique()
 df_all_g['date_completed'] = df_all_g['date_completed'].astype(str)
-
 fig = px.bar(df_all_g, x="date_completed", y="id", title='Daily completed tasks', hover_name='project-id')
 
 if remove_weekends:
