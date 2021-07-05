@@ -10,23 +10,25 @@ date_to_filter = st.slider('days back', 0, 30, 8)
 remove_weekends = st.checkbox("Remove Weekends?", False)
 
 dc = data_collector(token)
-df_full = dc.collect()
-df_full['datehour_completed'] = pd.to_datetime(df_full['date_completed'])
-df_full['datehour_completed'] = pd.DatetimeIndex(df_full['datehour_completed']).tz_convert(None)
+dc.collect()
+df_full = dc.items
 
-filtered_df = df_full.loc[df_full['datehour_completed'] >= datetime.today() - timedelta(days=date_to_filter)]
-filtered_df['date_completed'] = pd.to_datetime(filtered_df['datehour_completed']).dt.date
-filtered_df['date_completed_weekday'] = pd.to_datetime(filtered_df['datehour_completed']).dt.day_name()
+df_full['datehour_completed'] = pd.to_datetime(df_full['completed_date'])
+df_full['datehour_completed'] = pd.DatetimeIndex(df_full['datehour_completed']).tz_convert('America/Sao_Paulo')
+
+filtered_df = df_full.loc[df_full['datehour_completed'] >= pd.to_datetime('today').tz_localize('America/Sao_Paulo') - timedelta(days=date_to_filter)]
+filtered_df['completed_date'] = pd.to_datetime(filtered_df['datehour_completed']).dt.date
+filtered_df['completed_date_weekday'] = pd.to_datetime(filtered_df['datehour_completed']).dt.day_name()
 
 
 st.title("Todoist Analytics Report")
-st.markdown(f"Analyzing data from {filtered_df.date_completed.min()} until {filtered_df.date_completed.max()}")
-st.markdown(f"a grand total of {filtered_df.id.nunique()} completed tasks in {filtered_df.project_id.nunique()} projects")
+st.markdown(f"Analyzing data from {filtered_df.completed_date.min()} until {filtered_df.completed_date.max()}")
+st.markdown(f"a grand total of {len(filtered_df)} completed tasks in {filtered_df.project_id.nunique()} projects")
 
 
-df_all_g = filtered_df[['date_completed', 'project-id', 'id', 'content']].groupby(['date_completed'], as_index=False).nunique()
-df_all_g['date_completed'] = df_all_g['date_completed'].astype(str)
-fig = px.bar(df_all_g, x="date_completed", y="id", title='Daily completed tasks', hover_name='project-id')
+df_all_g = filtered_df[['completed_date', 'project_id', 'id', 'content']].groupby(['completed_date'], as_index=False).nunique()
+df_all_g['completed_date'] = df_all_g['completed_date'].astype(str)
+fig = px.bar(df_all_g, x="completed_date", y="id", title='Daily completed tasks', hover_name='project_id')
 
 if remove_weekends:
     fig.update_xaxes(

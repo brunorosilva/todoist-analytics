@@ -2,13 +2,11 @@
 /ipynb_checkpoints
 credentials.py
 Exploratory.ipynb
-.ipynb_checkpoints/Exploratory-checkpoint.ipynb
+.ipynb_checkpoints
 todoist-analytics/Untitled.ipynb
 todoist-analytics/.ipynb_checkpoints/Untitled-checkpoint.ipynb
-todoist-analytics/__pycache__/credentials.cpython-38.pyc
-todoist-analytics/__pycache__/data.cpython-38.pyc
-sample_data/dues.csv
-sample_data/projects.csv
-sample_data/tasks.csv
+todoist-analytics/__pycache__
+sample_data
 .ipynb_checkpoints/Untitled-checkpoint.ipynb
 Untitled.ipynb
+*.ipynb
