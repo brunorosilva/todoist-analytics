@@ -1,12 +1,14 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-import os
 import json
-import requests
-import todoist
-from ..credentials import token
+import os
 from datetime import datetime
+
+import numpy as np
+import pandas as pd
+import requests
+import streamlit as st
+import todoist
+
+from ..credentials import token
 
 
 class DataCollector():
@@ -21,9 +23,9 @@ class DataCollector():
 
     def _preprocess(self, data):
         self.items = pd.DataFrame(data['items'])
-        self.projects = pd.DataFrame.from_dict(data['projects'], orient='index')
+        self.projects = pd.DataFrame.from_dict(
+            data['projects'], orient='index')
 
     def collect(self, since=None, until=None):
         data = self.api.completed.get_all(until=until, since=since, limit=200)
         self._preprocess(data)
-        

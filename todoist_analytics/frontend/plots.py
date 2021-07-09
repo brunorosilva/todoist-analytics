@@ -1,7 +1,20 @@
 import datetime
-import plotly.graph_objs as go
+from pandas import DataFrame
+
 import numpy as np
+import plotly.graph_objs as go
+import plotly.express as px
+from plotly.missing_ipywidgets import FigureWidget
 from plotly.subplots import make_subplots
+
+def completed_tasks_per_day(completed_tasks:DataFrame) -> FigureWidget:
+    daily_completed_tasks = completed_tasks[['completed_date', 'project_id', 'id', 'content']].groupby(
+        ['completed_date'], as_index=False).nunique()
+    daily_completed_tasks['completed_date'] = daily_completed_tasks['completed_date'].astype(str)
+    fig = px.bar(daily_completed_tasks, x="completed_date", y="id",
+                 title='Daily completed tasks', hover_name='project_id')
+    
+    return fig
 
 
 def display_year(z,
@@ -123,7 +136,7 @@ def display_year(z,
     return fig
 
 
-def display_years(z, years):
+def calendar_plot(z, years) -> FigureWidget:
     fig = make_subplots(rows=len(years), cols=1, subplot_titles=years)
     for i, year in enumerate(years):
         data = z[i*365: (i+1)*365]

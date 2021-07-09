@@ -1,7 +1,8 @@
-from pandas.core.frame import DataFrame
-from .data_collector import DataCollector
-import pandas as pd
 import numpy as np
+import pandas as pd
+from pandas.core.frame import DataFrame
+
+from .data_collector import DataCollector
 
 
 def preprocess(dc: DataCollector) -> pd.DataFrame:
