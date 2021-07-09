@@ -5,12 +5,11 @@ import os
 import json
 import requests
 import todoist
-from credentials import token
-from todoist.managers.completed import CompletedManager
+from ..credentials import token
 from datetime import datetime
 
 
-class data_collector():
+class DataCollector():
     def __init__(self, token):
         self.token = token
         try:
@@ -28,5 +27,3 @@ class data_collector():
         data = self.api.completed.get_all(until=until, since=since, limit=200)
         self._preprocess(data)
         
-
-    
