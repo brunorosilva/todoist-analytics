@@ -7,6 +7,7 @@ from .data_collector import DataCollector
 
 def preprocess(dc: DataCollector) -> pd.DataFrame:
     df_full = dc.items
+    print(df_full.shape)
 
     df_full['datehour_completed'] = pd.to_datetime(df_full['completed_date'])
     df_full['datehour_completed'] = pd.DatetimeIndex(

@@ -1,6 +1,9 @@
 # local files
 credentials.py
 
+# local folders
+todoist_analytics/backend/db
+
 # more hidden folders
 .venv/
 .vscode/

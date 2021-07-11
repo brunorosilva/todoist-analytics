@@ -18,9 +18,10 @@ def create_app():
     remove_weekends = st.checkbox("Remove Weekends?", False)
 
     dc = DataCollector(token)
-    dc.collect()
 
-    completed_tasks = preprocess(dc)
+    if not dc.got_all_tasks:
+        dc.collect_all()
+        completed_tasks = preprocess(dc)
 
     completed_tasks = completed_tasks.loc[completed_tasks['datehour_completed'] >= pd.to_datetime(
         'today').tz_localize('America/Sao_Paulo') - timedelta(days=date_to_filter)]
