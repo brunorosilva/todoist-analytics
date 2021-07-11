@@ -6,39 +6,31 @@ import plotly.express as px
 import streamlit as st
 
 from ..backend.data_collector import DataCollector
-from ..backend.preprocess import preprocess
+from ..backend.utils import *
 from ..credentials import token
 from .plots import *
+from .filters import *
 
 
 def create_app():
     st.title("Todoist Analytics Report")
 
-    date_to_filter = st.slider('days back', 0, 30, 8)
-    remove_weekends = st.checkbox("Remove Weekends?", False)
+    # date_to_filter = st.slider('days back', 0, 30, 8)
 
-    dc = DataCollector(token)
+    completed_tasks = get_data(token)
 
-    if not dc.got_all_tasks:
-        dc.collect_all()
-        completed_tasks = preprocess(dc)
+    # completed_tasks = completed_tasks.loc[completed_tasks['datehour_completed'] >= pd.to_datetime(
+    #     'today').tz_localize('America/Sao_Paulo') - timedelta(days=date_to_filter)]
 
-    completed_tasks = completed_tasks.loc[completed_tasks['datehour_completed'] >= pd.to_datetime(
-        'today').tz_localize('America/Sao_Paulo') - timedelta(days=date_to_filter)]
+    completed_tasks = date_filter(completed_tasks, "Choose the date range")
+    completed_tasks = weekend_filter(completed_tasks, "Remove Weekends?")
 
     st.markdown(
-        f"Analyzing data from {completed_tasks.completed_date.min()} until {completed_tasks.completed_date.max()}")
+        f"Analyzing data since {completed_tasks.completed_date.min()} until {completed_tasks.completed_date.max()}")
     st.markdown(
         f"a grand total of {len(completed_tasks)} completed tasks in {completed_tasks.project_id.nunique()} projects")
 
-    fig = completed_tasks_per_day(completed_tasks)
-    if remove_weekends:
-        fig.update_xaxes(
-            rangebreaks=[
-                {'pattern': 'day of week', 'bounds': [6, 1]}
-            ]
-        )
-    st.plotly_chart(fig)
+    st.plotly_chart(completed_tasks_per_day(completed_tasks))
 
     z = np.random.randint(2, size=(500,))
 
