@@ -1,5 +1,5 @@
 # local files
-credentials.py
+todoist_analytics/credentials.py
 
 # local folders
 todoist_analytics/backend/db

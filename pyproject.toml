@@ -4,6 +4,9 @@ version = "0.0.0"
 description = ""
 authors = ["Bruno Rodrigues <b.rosilva1@gmail.com>"]
 readme = "README.md"
+packages = [
+    {include = "todoist_analytics"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"

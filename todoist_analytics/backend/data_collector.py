@@ -13,7 +13,7 @@ from streamlit.caching import cache
 import todoist
 from sqlalchemy import Date, Float, Integer, String, create_engine
 
-from ..credentials import token
+from todoist_analytics.credentials import token
 
 
 class DataCollector():

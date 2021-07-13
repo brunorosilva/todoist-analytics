@@ -3,22 +3,28 @@ import pandas as pd
 import streamlit as st
 from pandas.core.frame import DataFrame
 
-from .data_collector import DataCollector
+from todoist_analytics.backend.data_collector import DataCollector
 
 
 def preprocess(dc: DataCollector) -> pd.DataFrame:
-    df_full = dc.items
-    print(df_full.shape)
+    completed_tasks = dc.items
+    projects = dc.projects
+    projects = projects.rename({"id":"project_id"}, axis=1)
 
-    df_full['datehour_completed'] = pd.to_datetime(df_full['completed_date'])
-    df_full['datehour_completed'] = pd.DatetimeIndex(
-        df_full['datehour_completed']).tz_convert('America/Sao_Paulo')
-    df_full['completed_date'] = pd.to_datetime(
-        df_full['datehour_completed']).dt.date
-    df_full['completed_date_weekday'] = pd.to_datetime(
-        df_full['datehour_completed']).dt.day_name()
-
-    return df_full
+    completed_tasks['datehour_completed'] = pd.to_datetime(completed_tasks['completed_date'])
+    completed_tasks['datehour_completed'] = pd.DatetimeIndex(
+        completed_tasks['datehour_completed']).tz_convert('America/Sao_Paulo')
+    completed_tasks['completed_date'] = pd.to_datetime(
+        completed_tasks['datehour_completed']).dt.date
+    completed_tasks['completed_date_weekday'] = pd.to_datetime(
+        completed_tasks['datehour_completed']).dt.day_name()
+    print(completed_tasks.shape)
+    completed_tasks = completed_tasks.merge(projects[["project_id", "name"]], how="left", left_on="project_id", right_on="project_id")
+    completed_tasks = completed_tasks.rename({"name":"project_name"}, axis=1)
+    print(completed_tasks.columns)
+    print(completed_tasks.shape)
+    print(projects['project_id'])
+    return completed_tasks
 
 
 @st.cache

@@ -25,3 +25,13 @@ def weekend_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
             completed_tasks['completed_date_weekday'].isin(["Sunday", "Saturday"]))]
 
     return completed_tasks
+
+
+def project_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
+    selected_projects = st.sidebar.multiselect(
+        label, completed_tasks.project_name.unique())
+    if len(selected_projects) != 0:
+        completed_tasks = completed_tasks.loc[(
+            completed_tasks['project_name'].isin(selected_projects))]
+
+    return completed_tasks

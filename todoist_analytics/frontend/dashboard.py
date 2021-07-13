@@ -5,11 +5,11 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from ..backend.data_collector import DataCollector
-from ..backend.utils import *
-from ..credentials import token
-from .plots import *
-from .filters import *
+from todoist_analytics.backend.data_collector import DataCollector
+from todoist_analytics.backend.utils import *
+from todoist_analytics.credentials import token
+from todoist_analytics.frontend.plots import *
+from todoist_analytics.frontend.filters import *
 
 
 def create_app():
@@ -24,6 +24,7 @@ def create_app():
 
     completed_tasks = date_filter(completed_tasks, "Choose the date range")
     completed_tasks = weekend_filter(completed_tasks, "Remove Weekends?")
+    completed_tasks = project_filter(completed_tasks, "Select the desired")
 
     st.markdown(
         f"Analyzing data since {completed_tasks.completed_date.min()} until {completed_tasks.completed_date.max()}")
