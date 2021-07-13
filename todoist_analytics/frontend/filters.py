@@ -9,11 +9,8 @@ def date_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
                                         completed_tasks.completed_date.min(),
                                         completed_tasks.completed_date.max()])
 
-    if date_filter[1] < date_filter[0]:
-        st.sidebar.write("Please provide a valid range of dates")
-    else:
-        completed_tasks = completed_tasks.loc[(completed_tasks["completed_date"] >= date_filter[0]) & (
-            completed_tasks["completed_date"] <= date_filter[1])]
+    completed_tasks = completed_tasks.loc[(completed_tasks["completed_date"] >= date_filter[0]) & (
+        completed_tasks["completed_date"] <= date_filter[1])]
 
     return completed_tasks
 
