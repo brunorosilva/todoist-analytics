@@ -1,5 +1,6 @@
 import datetime
 from pandas import DataFrame
+import pandas as pd
 
 import numpy as np
 import plotly.graph_objs as go
@@ -11,14 +12,19 @@ def completed_tasks_per_day(completed_tasks:DataFrame) -> FigureWidget:
     daily_completed_tasks = completed_tasks[['completed_date', 'project_id', 'id', 'content']].groupby(
         ['completed_date'], as_index=False).nunique()
     daily_completed_tasks['completed_date'] = daily_completed_tasks['completed_date'].astype(str)
-    fig = px.bar(daily_completed_tasks, x="completed_date", y="id",
-                 title='Daily completed tasks', hover_name='project_id')
+    fig = px.bar(
+        daily_completed_tasks, 
+        x="completed_date", 
+        y="id",
+        title='Daily completed tasks',
+        hover_name='project_id'
+        )
     
     return fig
 
 
-def display_year(z,
-                 year: int = None,
+def display_year(completed_tasks:DataFrame,
+                 year,
                  month_lines: bool = True,
                  fig=None,
                  row: int = None):
@@ -136,11 +142,19 @@ def display_year(z,
     return fig
 
 
-def calendar_plot(z, years) -> FigureWidget:
+def calendar_plot(completed_tasks) -> FigureWidget:
+
+    years = pd.to_datetime(
+        completed_tasks['datehour_completed']).dt.year.unique()
+    
+    daily_completed_tasks = completed_tasks[['completed_date', 'project_id', 'id', 'content']].groupby(
+        ['completed_date'], as_index=False).nunique()
+    daily_completed_tasks['completed_date'] = daily_completed_tasks['completed_date'].astype(str)
+    
     fig = make_subplots(rows=len(years), cols=1, subplot_titles=years)
     for i, year in enumerate(years):
-        data = z[i*365: (i+1)*365]
-        display_year(data, year=year, fig=fig, row=i)
+        data = completed_tasks[i*365: (i+1)*365]
+        display_year(data, year=str(year), fig=fig, row=i)
         fig.update_layout(height=250*len(years))
 
     return fig

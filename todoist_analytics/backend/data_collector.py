@@ -3,7 +3,6 @@ import json
 import os
 from datetime import datetime
 from types import new_class
-import functools
 
 import numpy as np
 import pandas as pd
@@ -11,7 +10,6 @@ import requests
 import streamlit as st
 from streamlit.caching import cache
 import todoist
-from sqlalchemy import Date, Float, Integer, String, create_engine
 
 from todoist_analytics.credentials import token
 

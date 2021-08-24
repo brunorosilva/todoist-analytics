@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+from streamlit_metrics import metric_row
 
 from todoist_analytics.backend.data_collector import DataCollector
 from todoist_analytics.backend.utils import *
@@ -33,9 +34,17 @@ def create_app():
 
     st.plotly_chart(completed_tasks_per_day(completed_tasks))
 
-    z = np.random.randint(2, size=(500,))
+    metric_row(
+        {
+            "Metric 1": 100,
+            "Metric 2": 200,
+            "Metric 3": 300,
+            "Metric 4": 400,
+            "Metric 5": 500,
+        }
+    )
 
-    st.plotly_chart(calendar_plot(z, (2019, 2020)))
+    # st.plotly_chart(calendar_plot(completed_tasks))
 
 
 if __name__ == "__main__":
