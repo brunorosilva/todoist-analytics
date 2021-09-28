@@ -8,13 +8,13 @@ import numpy as np
 import pandas as pd
 import requests
 import streamlit as st
-from streamlit.caching import cache
 import todoist
+from streamlit.caching import cache
 
 from todoist_analytics.credentials import token
 
 
-class DataCollector():
+class DataCollector:
     def __init__(self, token):
         self.token = token
         self.items = pd.DataFrame()
@@ -32,9 +32,10 @@ class DataCollector():
         self._append_to_properties(data)
 
     def _append_to_properties(self, data):
-        self.items = self.items.append(pd.DataFrame(data['items']))
-        self.projects = self.projects.append(pd.DataFrame.from_dict(
-            data['projects'], orient='index'))
+        self.items = self.items.append(pd.DataFrame(data["items"]))
+        self.projects = self.projects.append(
+            pd.DataFrame.from_dict(data["projects"], orient="index")
+        )
 
     def collect_all(self):
         """
@@ -53,4 +54,3 @@ class DataCollector():
             else:
                 print(f"Got all {len(self.items)} tasks")
                 self.got_all_tasks = True
-
