@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from pandas.core.frame import DataFrame
+from datetime import timedelta
 
 
 def date_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
@@ -20,6 +21,14 @@ def weekend_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
     if remove_weekends:
         completed_tasks = completed_tasks.loc[~(
             completed_tasks['completed_date_weekday'].isin(["Sunday", "Saturday"]))]
+
+    return completed_tasks
+
+def last_week_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
+    view_last_week = st.sidebar.checkbox(label, False)
+    if view_last_week:
+        completed_tasks = completed_tasks.loc[(
+            completed_tasks['completed_date'] >= completed_tasks['completed_date'].max() - timedelta(days=7))]
 
     return completed_tasks
 

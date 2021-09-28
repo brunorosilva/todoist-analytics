@@ -179,14 +179,11 @@ unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "click"
-version = "8.0.1"
+version = "7.1.2"
 description = "Composable command line interface toolkit"
 category = "main"
 optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-colorama = {version = "*", markers = "platform_system == \"Windows\""}
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "colorama"
@@ -1132,7 +1129,7 @@ test = ["pytest"]
 
 [[package]]
 name = "streamlit"
-version = "0.79.0"
+version = "0.87.0"
 description = "The fastest way to build data apps in Python"
 category = "main"
 optional = false
@@ -1141,17 +1138,18 @@ python-versions = ">=3.6"
 [package.dependencies]
 altair = ">=3.2.0"
 astor = "*"
+attrs = "*"
 base58 = "*"
 blinker = "*"
 cachetools = ">=4.0"
-click = ">=7.0"
-gitpython = "*"
+click = ">=7.0,<8.0"
+gitpython = "!=3.1.19"
 numpy = "*"
 packaging = "*"
 pandas = ">=0.21.0"
 pillow = ">=6.2.0"
 protobuf = ">=3.6.0,<3.11 || >3.11"
-pyarrow = {version = "*", markers = "python_version < \"3.9\""}
+pyarrow = "*"
 pydeck = ">=0.1.dev5"
 python-dateutil = "*"
 requests = "*"
@@ -1336,7 +1334,7 @@ notebook = ">=4.4.1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "251f53c2be66287e9b88653417d076c47d89b61473685d8156c6707363e8df68"
+content-hash = "89ba5b9e8759d570f36d1ad0610ffb3e437f73bb89523502c556f15f296ba456"
 
 [metadata.files]
 alabaster = [
@@ -1470,8 +1468,8 @@ charset-normalizer = [
     {file = "charset_normalizer-2.0.4-py3-none-any.whl", hash = "sha256:0c8911edd15d19223366a194a513099a302055a962bca2cec0f54b8b63175d8b"},
 ]
 click = [
-    {file = "click-8.0.1-py3-none-any.whl", hash = "sha256:fba402a4a47334742d782209a7c79bc448911afe1149d07bdabdf480b3e2f4b6"},
-    {file = "click-8.0.1.tar.gz", hash = "sha256:8c04c11192119b1ef78ea049e0a6f0463e4c48ef00a30160c704337586f3ad7a"},
+    {file = "click-7.1.2-py2.py3-none-any.whl", hash = "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"},
+    {file = "click-7.1.2.tar.gz", hash = "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a"},
 ]
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
@@ -2079,8 +2077,8 @@ sphinxcontrib-serializinghtml = [
     {file = "sphinxcontrib_serializinghtml-1.1.5-py2.py3-none-any.whl", hash = "sha256:352a9a00ae864471d3a7ead8d7d79f5fc0b57e8b3f95e9867eb9eb28999b92fd"},
 ]
 streamlit = [
-    {file = "streamlit-0.79.0-py2.py3-none-any.whl", hash = "sha256:35c2c901b5fee15174a0cc03e465e9b13a10f8f411d925c2ca9dd012bdc8ab20"},
-    {file = "streamlit-0.79.0.tar.gz", hash = "sha256:8532aad5a05af08dd48e955fa64bc9fe9e3fb99a4c95514215a597ba56e05121"},
+    {file = "streamlit-0.87.0-py2.py3-none-any.whl", hash = "sha256:1dbe55774f1ebd46c6a77d1fda53167774074e6400f320cc44b13ab8a3900647"},
+    {file = "streamlit-0.87.0.tar.gz", hash = "sha256:7e63e3ac025717ff9c9a8c1903fa528ad0598b09b76705e54e2728a3d9d90aad"},
 ]
 streamlit-metrics = [
     {file = "streamlit_metrics-0.1.0-py3-none-any.whl", hash = "sha256:13089f89aec2e25278c1561c9684bf561139f0e1cf9a255e0a8e0a831bc8344e"},

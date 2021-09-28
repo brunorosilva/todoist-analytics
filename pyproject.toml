@@ -16,7 +16,7 @@ streamlit-metrics = "^0.1.0"
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 Sphinx = "^3.4.2"
-streamlit = "^0.79.0"
+streamlit = "^0.87.0"
 plotly = "^4.14.0"
 myst-parser = "^0.13.1"
 pydata-sphinx-theme = "^0.4.1"
