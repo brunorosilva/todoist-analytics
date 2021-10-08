@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import streamlit as st
 from pandas.core.frame import DataFrame
@@ -6,7 +5,7 @@ from pandas.core.frame import DataFrame
 from todoist_analytics.backend.data_collector import DataCollector
 
 
-def preprocess(dc: DataCollector) -> pd.DataFrame:
+def preprocess(dc: DataCollector) -> DataFrame:
     completed_tasks = dc.items
     projects = dc.projects
     projects = projects.rename({"id": "project_id"}, axis=1)
@@ -36,7 +35,7 @@ def preprocess(dc: DataCollector) -> pd.DataFrame:
     return completed_tasks
 
 
-@st.cache
+@st.cache(show_spinner=False) # caching the data and hiding the spinner warning
 def get_data(token):
     dc = DataCollector(token)
     dc.collect_all()

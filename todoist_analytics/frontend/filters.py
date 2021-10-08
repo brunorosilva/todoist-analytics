@@ -1,7 +1,5 @@
-from datetime import timedelta
+from datetime import timedelta, date
 
-import numpy as np
-import pandas as pd
 import streamlit as st
 from pandas.core.frame import DataFrame
 
@@ -37,6 +35,38 @@ def last_week_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
             (
                 completed_tasks["completed_date"]
                 >= completed_tasks["completed_date"].max() - timedelta(days=7)
+            )
+        ]
+
+    return completed_tasks
+
+
+def last_month_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
+    view_last_week = st.sidebar.checkbox(label, False)
+    if view_last_week:
+        completed_tasks = completed_tasks.loc[
+            (
+                completed_tasks["completed_date"]
+                >= date(
+                    completed_tasks["completed_date"].max().year,
+                    completed_tasks["completed_date"].max().month,
+                    1)
+            )
+        ]
+
+    return completed_tasks
+
+
+def last_year_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
+    view_last_week = st.sidebar.checkbox(label, False)
+    if view_last_week:
+        completed_tasks = completed_tasks.loc[
+            (
+                completed_tasks["completed_date"]
+                >= date(
+                    completed_tasks["completed_date"].max().year,
+                    1,
+                    1)
             )
         ]
 
