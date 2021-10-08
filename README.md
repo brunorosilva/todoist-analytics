@@ -31,5 +31,12 @@ Personalized insights and monthly reviews (:
 ## Get your API Key
 Go to your Todoist settings into the integrations tab, at the bottom you'll find your API key, copy it.
 
-## Create your credentials.py file (This will be resolved)
-Create a python file inside the todoist_analytics folder named credentials.py and 
+## Create your credentials.py file
+
+`$ make credentials`
+
+and if your credential file doesn't exist, you will be prompted to input your token.
+
+## Run the app
+
+`$ make app`
