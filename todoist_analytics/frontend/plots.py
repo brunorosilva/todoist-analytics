@@ -32,6 +32,48 @@ def completed_tasks_per_day(completed_tasks: DataFrame) -> FigureWidget:
 
     return fig
 
+def completed_tasks_per_day_per_project(completed_tasks: DataFrame) -> FigureWidget:
+    daily_completed_tasks_per_project = (
+        completed_tasks[["completed_date", "project_id", "id", "project_name", "content"]]
+        .groupby(["completed_date", "project_name"], as_index=False)
+        .nunique()
+    )
+    daily_completed_tasks_per_project["completed_date"] = daily_completed_tasks_per_project[
+        "completed_date"
+    ].astype(str)
+    fig = px.bar(
+        daily_completed_tasks_per_project,
+        x="completed_date",
+        y="id",
+        color="project_name",
+        title="Daily completed tasks",
+        hover_name="project_id",
+    )
+
+    return fig
+
+def one_hundred_stacked_bar_plot_per_project(completed_tasks: DataFrame) -> FigureWidget:
+
+    daily_completed_tasks_per_project = (
+        completed_tasks[["completed_date", "project_id", "id", "project_name", "content"]]
+        .groupby(["completed_date", "project_name"], as_index=False)
+        .nunique()
+    )
+    daily_completed_tasks_per_project["completed_date"] = daily_completed_tasks_per_project[
+        "completed_date"
+    ].astype(str)
+
+    aux = daily_completed_tasks_per_project.copy()
+    aux = aux.pivot(index=["completed_date"], columns="project_name", values="id").fillna(0)
+    aux = aux.div(aux.sum(axis=1), axis=0)
+
+    fig = go.Figure()
+
+    for project in daily_completed_tasks_per_project["project_name"].unique():
+        fig.add_trace(go.Bar(x=aux.index, y=aux[project], name=project))
+    fig.update_layout(barmode='relative', title_text='Percentage of tasks per project')
+    return fig
+
 
 def display_year(
     completed_tasks: DataFrame,

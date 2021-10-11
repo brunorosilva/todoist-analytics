@@ -1,6 +1,13 @@
 package := "todoist-analytics"
 
 # launch streamlit app
+get_token:
+	read token; \
+	echo "token = " \"$$token\" > "./todoist_analytics/credentials.py"
+
+credentials:
+	[ -f ./todoist_analytics/credentials.py ] && echo credentials ok || $(MAKE) get_token
+
 app:
 	poetry run streamlit run streamlit_app.py
 

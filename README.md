@@ -19,16 +19,24 @@ If you're not sure about how to properly use todoist for task planning check out
 ## Part 1: Getting the data -> Done
 Create an application that calls the Todoist API and gets all done and tbd tasks from an user
 
-## Part 2: Analyse the data from last week (Current)
+## Part 2: Weekly review tab (Current)
 From the gattered data create a dashboard with info from the user's last week plus some insights
 
-## Part 3: Saving the data for long term analytics
-Connect with some service in order to store the user data and possibitate long term analytics
-
-## Part 4: Long term analytics
-From the saved data create a personalized insights page for you (:
+## Part 3: Monthly review tab
+Personalized insights and monthly reviews (:
 
 
 # Usage
 
-V0 -> Allow this tool to call your todoist API. I'll make a tutorial on how to get your token.
+## Get your API Key
+Go to your Todoist settings into the integrations tab, at the bottom you'll find your API key, copy it.
+
+## Create your credentials.py file
+
+`$ make credentials`
+
+and if your credential file doesn't exist, you will be prompted to input your token.
+
+## Run the app
+
+`$ make app`

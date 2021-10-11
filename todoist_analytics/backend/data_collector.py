@@ -1,18 +1,6 @@
-import dataclasses
-import json
-import os
-from datetime import datetime
-from types import new_class
-
-import numpy as np
 import pandas as pd
-import requests
-import streamlit as st
 import todoist
-from streamlit.caching import cache
-
-from todoist_analytics.credentials import token
-
+import streamlit as st
 
 class DataCollector:
     def __init__(self, token):
