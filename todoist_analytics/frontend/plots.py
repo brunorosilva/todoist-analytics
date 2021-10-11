@@ -22,8 +22,12 @@ def completed_tasks_per_day(completed_tasks: DataFrame) -> FigureWidget:
         daily_completed_tasks,
         x="completed_date",
         y="id",
-        title="Daily completed tasks",
-        hover_name="project_id",
+        hover_name="project_id"
+    )
+    fig.update_layout(
+        yaxis_title="Completed tasks",
+        xaxis_title="Date of completion"
+
     )
 
     return fig

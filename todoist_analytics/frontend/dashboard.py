@@ -14,6 +14,9 @@ from todoist_analytics.frontend.plots import *
 
 
 def create_app():
+    st.set_page_config(
+        page_title="Todoist Analytics"
+    )
     st.title("Todoist Analytics Report")
 
     # date_to_filter = st.slider('days back', 0, 30, 8)
