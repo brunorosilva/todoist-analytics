@@ -7,6 +7,7 @@ import plotly.graph_objs as go
 from pandas import DataFrame
 from plotly.missing_ipywidgets import FigureWidget
 from plotly.subplots import make_subplots
+from streamlit.elements.arrow import Data
 
 
 def completed_tasks_per_day(completed_tasks: DataFrame) -> FigureWidget:
@@ -19,28 +20,31 @@ def completed_tasks_per_day(completed_tasks: DataFrame) -> FigureWidget:
         "completed_date"
     ].astype(str)
     fig = px.bar(
-        daily_completed_tasks,
-        x="completed_date",
-        y="id",
-        hover_name="project_id"
+        daily_completed_tasks, x="completed_date", y="id", hover_name="project_id"
     )
-    fig.update_layout(
-        yaxis_title="Completed tasks",
-        xaxis_title="Date of completion"
-
-    )
+    fig.update_layout(yaxis_title="Completed tasks", xaxis_title="Date of completion")
 
     return fig
 
+
+def create_color_palette(completed_tasks: DataFrame):
+    global project_id_color
+    project_id_color = pd.Series(
+        completed_tasks.color.values, index=completed_tasks.project_id
+    ).to_dict()
+
+
 def completed_tasks_per_day_per_project(completed_tasks: DataFrame) -> FigureWidget:
     daily_completed_tasks_per_project = (
-        completed_tasks[["completed_date", "project_id", "id", "project_name", "content"]]
+        completed_tasks[
+            ["completed_date", "project_id", "id", "project_name", "content"]
+        ]
         .groupby(["completed_date", "project_name"], as_index=False)
         .nunique()
     )
-    daily_completed_tasks_per_project["completed_date"] = daily_completed_tasks_per_project[
+    daily_completed_tasks_per_project[
         "completed_date"
-    ].astype(str)
+    ] = daily_completed_tasks_per_project["completed_date"].astype(str)
     fig = px.bar(
         daily_completed_tasks_per_project,
         x="completed_date",
@@ -52,26 +56,33 @@ def completed_tasks_per_day_per_project(completed_tasks: DataFrame) -> FigureWid
 
     return fig
 
-def one_hundred_stacked_bar_plot_per_project(completed_tasks: DataFrame) -> FigureWidget:
+
+def one_hundred_stacked_bar_plot_per_project(
+    completed_tasks: DataFrame,
+) -> FigureWidget:
 
     daily_completed_tasks_per_project = (
-        completed_tasks[["completed_date", "project_id", "id", "project_name", "content"]]
+        completed_tasks[
+            ["completed_date", "project_id", "id", "project_name", "content"]
+        ]
         .groupby(["completed_date", "project_name"], as_index=False)
         .nunique()
     )
-    daily_completed_tasks_per_project["completed_date"] = daily_completed_tasks_per_project[
+    daily_completed_tasks_per_project[
         "completed_date"
-    ].astype(str)
+    ] = daily_completed_tasks_per_project["completed_date"].astype(str)
 
     aux = daily_completed_tasks_per_project.copy()
-    aux = aux.pivot(index=["completed_date"], columns="project_name", values="id").fillna(0)
+    aux = aux.pivot(
+        index=["completed_date"], columns="project_name", values="id"
+    ).fillna(0)
     aux = aux.div(aux.sum(axis=1), axis=0)
 
     fig = go.Figure()
 
     for project in daily_completed_tasks_per_project["project_name"].unique():
         fig.add_trace(go.Bar(x=aux.index, y=aux[project], name=project))
-    fig.update_layout(barmode='relative', title_text='Percentage of tasks per project')
+    fig.update_layout(barmode="relative", title_text="Percentage of tasks per project")
     return fig
 
 

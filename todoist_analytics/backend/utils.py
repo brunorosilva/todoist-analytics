@@ -23,7 +23,7 @@ def preprocess(dc: DataCollector) -> DataFrame:
         completed_tasks["datehour_completed"]
     ).dt.day_name()
     completed_tasks = completed_tasks.merge(
-        projects[["project_id", "name"]],
+        projects[["project_id", "name", "color", "inbox_project"]],
         how="left",
         left_on="project_id",
         right_on="project_id",
@@ -35,7 +35,7 @@ def preprocess(dc: DataCollector) -> DataFrame:
     return completed_tasks
 
 
-@st.cache(show_spinner=False) # caching the data and hiding the spinner warning
+@st.cache(show_spinner=False)  # caching the data and hiding the spinner warning
 def get_data(token):
     dc = DataCollector(token)
     dc.collect_all()

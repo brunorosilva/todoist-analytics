@@ -1,4 +1,4 @@
-from datetime import timedelta, date
+from datetime import date, timedelta
 
 import streamlit as st
 from pandas.core.frame import DataFrame
@@ -50,7 +50,8 @@ def last_month_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
                 >= date(
                     completed_tasks["completed_date"].max().year,
                     completed_tasks["completed_date"].max().month,
-                    1)
+                    1,
+                )
             )
         ]
 
@@ -63,10 +64,7 @@ def last_year_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
         completed_tasks = completed_tasks.loc[
             (
                 completed_tasks["completed_date"]
-                >= date(
-                    completed_tasks["completed_date"].max().year,
-                    1,
-                    1)
+                >= date(completed_tasks["completed_date"].max().year, 1, 1)
             )
         ]
 

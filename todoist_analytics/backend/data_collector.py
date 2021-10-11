@@ -1,6 +1,6 @@
 import pandas as pd
 import todoist
-import streamlit as st
+
 
 class DataCollector:
     def __init__(self, token):
@@ -34,6 +34,7 @@ class DataCollector:
         old_shape = 0
         while not self.got_all_tasks:
             data = self.api.completed.get_all(limit=200, offset=i)
+            print(data["items"])
             self._append_to_properties(data)
             new_shape = self.items.shape[0]
             if new_shape != old_shape:

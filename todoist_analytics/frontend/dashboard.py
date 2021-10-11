@@ -9,15 +9,11 @@ from todoist_analytics.frontend.plots import *
 
 
 def create_app():
-    st.set_page_config(
-        page_title="Todoist Analytics"
-    )
+    st.set_page_config(page_title="Todoist Analytics")
     st.title("Todoist Analytics Report")
 
-    # date_to_filter = st.slider('days back', 0, 30, 8)
-    
     with st.spinner("Getting your data :)"):
-        completed_tasks = get_data(token)    
+        completed_tasks = get_data(token)
 
     completed_tasks = date_filter(completed_tasks, "date range filter")
     completed_tasks = last_week_filter(completed_tasks, "filter current week")
@@ -41,24 +37,31 @@ def create_app():
         ),
     )
     col4.metric(
-        "tasks per day", 
-        round(len(completed_tasks.drop_duplicates())/((completed_tasks['completed_date'].max()-completed_tasks['completed_date'].min()).days), 1)
+        "tasks per day",
+        round(
+            len(completed_tasks.drop_duplicates())
+            / (
+                (
+                    completed_tasks["completed_date"].max()
+                    - completed_tasks["completed_date"].min()
+                ).days
+            ),
+            1,
+        ),
     )
-
 
     st.markdown(
         f"Analyzing data since {completed_tasks.completed_date.min()} until {completed_tasks.completed_date.max()}"
     )
 
     completed_tasks_radio = st.radio("Choose your view", ["total", "per project"])
-    
+
     if completed_tasks_radio == "total":
         st.plotly_chart(completed_tasks_per_day(completed_tasks))
     else:
         st.plotly_chart(completed_tasks_per_day_per_project(completed_tasks))
 
     st.plotly_chart(one_hundred_stacked_bar_plot_per_project(completed_tasks))
-    
 
     # st.plotly_chart(calendar_plot(completed_tasks))
 
