@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import streamlit as st
 from pandas.core.frame import DataFrame
@@ -29,9 +30,20 @@ def preprocess(dc: DataCollector) -> DataFrame:
         right_on="project_id",
     )
     completed_tasks = completed_tasks.rename({"name": "project_name"}, axis=1)
-    print(completed_tasks.columns)
-    print(completed_tasks.shape)
-    print(projects["project_id"])
+
+    # creating the recurrent flag column -> not good implementation
+    completed_date_count = completed_tasks.groupby("task_id").agg(
+        {"completed_date": "nunique"}
+    )
+    completed_date_count["isRecurrent"] = np.where(
+        completed_date_count["completed_date"] > 1, 1, 0
+    )
+    completed_date_count.drop(columns="completed_date", inplace=True)
+
+    completed_tasks = completed_tasks.merge(
+        completed_date_count, left_on="task_id", right_index=True
+    )
+
     return completed_tasks
 
 
