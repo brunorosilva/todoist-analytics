@@ -34,7 +34,7 @@ def last_week_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
         completed_tasks = completed_tasks.loc[
             (
                 completed_tasks["completed_date"]
-                >= completed_tasks["completed_date"].max() - timedelta(days=7)
+                > completed_tasks["completed_date"].max() - timedelta(days=7)
             )
         ]
 

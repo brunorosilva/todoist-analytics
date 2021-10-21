@@ -1,5 +1,4 @@
-from datetime import timedelta
-
+import numpy as np
 import streamlit as st
 
 from todoist_analytics.backend.utils import *
@@ -22,33 +21,7 @@ def create_app():
     completed_tasks = weekend_filter(completed_tasks, "remove weekends")
     completed_tasks = project_filter(completed_tasks, "select the desired project")
 
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("completed tasks", len(completed_tasks.drop_duplicates()))
-    col2.metric("projects", completed_tasks.project_id.nunique())
-    col3.metric(
-        "last seven days completed tasks",
-        len(
-            completed_tasks.loc[
-                (
-                    completed_tasks["completed_date"]
-                    >= completed_tasks["completed_date"].max() - timedelta(days=7)
-                )
-            ].drop_duplicates()
-        ),
-    )
-    col4.metric(
-        "tasks per day",
-        round(
-            len(completed_tasks.drop_duplicates())
-            / (
-                (
-                    completed_tasks["completed_date"].max()
-                    - completed_tasks["completed_date"].min()
-                ).days
-            ),
-            1,
-        ),
-    )
+    create_metrics_cards(completed_tasks, list(st.columns(4)))
 
     st.markdown(
         f"Analyzing data since {completed_tasks.completed_date.min()} until {completed_tasks.completed_date.max()}"
@@ -56,12 +29,18 @@ def create_app():
 
     completed_tasks_radio = st.radio("Choose your view", ["total", "per project"])
 
+    color_palette = create_color_palette(completed_tasks)
+
     if completed_tasks_radio == "total":
         st.plotly_chart(completed_tasks_per_day(completed_tasks))
     else:
-        st.plotly_chart(completed_tasks_per_day_per_project(completed_tasks))
+        st.plotly_chart(
+            completed_tasks_per_day_per_project(completed_tasks, color_palette)
+        )
 
-    st.plotly_chart(one_hundred_stacked_bar_plot_per_project(completed_tasks))
+    st.plotly_chart(
+        one_hundred_stacked_bar_plot_per_project(completed_tasks, color_palette)
+    )
 
     # st.plotly_chart(calendar_plot(completed_tasks))
 

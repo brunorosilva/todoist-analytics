@@ -29,6 +29,11 @@ The main goal for this tool is to help you keep track and create analytics based
 - [ ] Part 4: Drop Streamlit
 Develop a Flask backend and a React frontend for better usage
 
+- [ ] Part 5: Cloud it up
+
+- [ ] Part 6: Transform this into a real todoist app (using the API OAuth)
+
+
 # Usage
 
 ## Get your API Key
