@@ -1,4 +1,5 @@
 import datetime
+from datetime import timedelta
 
 import numpy as np
 import pandas as pd
@@ -7,12 +8,42 @@ import plotly.graph_objs as go
 from pandas import DataFrame
 from plotly.missing_ipywidgets import FigureWidget
 from plotly.subplots import make_subplots
-from streamlit.elements.arrow import Data
+
+
+def create_metrics_cards(completed_tasks: DataFrame, cols: list):
+    cols[0].metric("completed tasks", len(completed_tasks.drop_duplicates()))
+    cols[1].metric("projects", completed_tasks.project_id.nunique())
+    cols[2].metric(
+        "tasks last 7 days",
+        len(
+            completed_tasks.loc[
+                (
+                    completed_tasks["completed_date"]
+                    >= completed_tasks["completed_date"].max() - timedelta(days=7)
+                )
+            ].drop_duplicates()
+        ),
+    )
+    cols[3].metric(
+        "tasks per day",
+        round(
+            len(completed_tasks.drop_duplicates())
+            / (
+                (
+                    np.busday_count(
+                        completed_tasks["completed_date"].min(),
+                        completed_tasks["completed_date"].max(),
+                    )
+                )
+            ),
+            1,
+        ),
+    )
 
 
 def completed_tasks_per_day(completed_tasks: DataFrame) -> FigureWidget:
     daily_completed_tasks = (
-        completed_tasks[["completed_date", "project_id", "id", "content"]]
+        completed_tasks[["completed_date", "project_id", "id", "content", "hex_color"]]
         .groupby(["completed_date"], as_index=False)
         .nunique()
     )
@@ -27,14 +58,9 @@ def completed_tasks_per_day(completed_tasks: DataFrame) -> FigureWidget:
     return fig
 
 
-def create_color_palette(completed_tasks: DataFrame):
-    global project_id_color
-    project_id_color = pd.Series(
-        completed_tasks.color.values, index=completed_tasks.project_id
-    ).to_dict()
-
-
-def completed_tasks_per_day_per_project(completed_tasks: DataFrame) -> FigureWidget:
+def completed_tasks_per_day_per_project(
+    completed_tasks: DataFrame, color_palette: dict
+) -> FigureWidget:
     daily_completed_tasks_per_project = (
         completed_tasks[
             ["completed_date", "project_id", "id", "project_name", "content"]
@@ -52,13 +78,14 @@ def completed_tasks_per_day_per_project(completed_tasks: DataFrame) -> FigureWid
         color="project_name",
         title="Daily completed tasks",
         hover_name="project_id",
+        color_discrete_map=color_palette,
     )
 
     return fig
 
 
 def one_hundred_stacked_bar_plot_per_project(
-    completed_tasks: DataFrame,
+    completed_tasks: DataFrame, color_palette: dict
 ) -> FigureWidget:
 
     daily_completed_tasks_per_project = (
@@ -81,7 +108,13 @@ def one_hundred_stacked_bar_plot_per_project(
     fig = go.Figure()
 
     for project in daily_completed_tasks_per_project["project_name"].unique():
-        fig.add_trace(go.Bar(x=aux.index, y=aux[project], name=project))
+        project_color = color_palette[project]
+        fig.add_trace(
+            go.Bar(
+                x=aux.index, y=aux[project], name=project, marker_color=project_color
+            )
+        )
+    # fig.update_traces(marker=dict(color=color_palette))
     fig.update_layout(barmode="relative", title_text="Percentage of tasks per project")
     return fig
 

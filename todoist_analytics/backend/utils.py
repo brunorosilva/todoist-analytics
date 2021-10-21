@@ -4,6 +4,7 @@ import streamlit as st
 from pandas.core.frame import DataFrame
 
 from todoist_analytics.backend.data_collector import DataCollector
+from todoist_analytics.frontend.colorscale import color_code_to_hex
 
 
 def preprocess(dc: DataCollector) -> DataFrame:
@@ -44,7 +45,18 @@ def preprocess(dc: DataCollector) -> DataFrame:
         completed_date_count, left_on="task_id", right_index=True
     )
 
+    completed_tasks["hex_color"] = completed_tasks["color"].apply(
+        lambda x: color_code_to_hex[int(x)]["hex"]
+    )
+
     return completed_tasks
+
+
+def create_color_palette(completed_tasks: DataFrame):
+    project_id_color = pd.Series(
+        completed_tasks.hex_color.values, index=completed_tasks.project_name
+    ).to_dict()
+    return project_id_color
 
 
 @st.cache(show_spinner=False)  # caching the data and hiding the spinner warning
