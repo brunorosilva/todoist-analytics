@@ -13,6 +13,7 @@ def create_app():
 
     with st.spinner("Getting your data :)"):
         completed_tasks = get_data(token)
+        completed_tasks_habits = completed_tasks.copy()
 
     completed_tasks = date_filter(completed_tasks, "date range filter")
     completed_tasks = last_week_filter(completed_tasks, "filter current week")
@@ -46,6 +47,7 @@ def create_app():
 
     figs.append(calendar_task_plot(completed_tasks))
 
+
     if remove_weekends:
         for fig in figs:
             fig.update_xaxes(
@@ -57,6 +59,13 @@ def create_app():
     for fig in figs:
         st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown("# Habit Tracking")
+    completed_tasks_habits[completed_tasks_habits["isRecurrent"]==1].to_csv("recurrent.csv")
+
+
+
+    # recurrent_tasks = get_recurrent_tasks(completed_tasks_habits)
+    # completed_tasks_habits = filter_recurrent_task()
 
 if __name__ == "__main__":
     app = create_app()

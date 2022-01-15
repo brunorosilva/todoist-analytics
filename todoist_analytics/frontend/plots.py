@@ -9,10 +9,11 @@ from pandas import DataFrame
 from plotly.missing_ipywidgets import FigureWidget
 from plotly.subplots import make_subplots
 from plotly_calplot import calplot
+from ..backend.utils import safe_divide
 
 
 def create_metrics_cards(completed_tasks: DataFrame, cols: list, remove_weekends: bool):
-    cols[0].metric("completed tasks", len(completed_tasks.drop_duplicates()))
+    cols[0].metric("completed tasks", len(completed_tasks))
     cols[1].metric("projects", completed_tasks.project_id.nunique())
     cols[2].metric(
         "tasks last 7 days",
@@ -22,7 +23,7 @@ def create_metrics_cards(completed_tasks: DataFrame, cols: list, remove_weekends
                     completed_tasks["completed_date"]
                     >= completed_tasks["completed_date"].max() - timedelta(days=7)
                 )
-            ].drop_duplicates()
+            ]
         ),
     )
     if remove_weekends:
@@ -30,15 +31,16 @@ def create_metrics_cards(completed_tasks: DataFrame, cols: list, remove_weekends
             "tasks per day",
             int(
                 round(
-                    len(completed_tasks.drop_duplicates())
-                    / (
+                    safe_divide(
+                    len(completed_tasks)
+                    ,(
                         (
                             np.busday_count(
                                 completed_tasks["completed_date"].min(),
                                 completed_tasks["completed_date"].max(),
                             )
-                        )
-                    ),
+                        ) + 1
+                    )),
                     0,
                 ),
             ),
@@ -48,14 +50,14 @@ def create_metrics_cards(completed_tasks: DataFrame, cols: list, remove_weekends
             "tasks per day",
             int(
                 round(
-                    len(completed_tasks.drop_duplicates())
+                    len(completed_tasks)
                     / (
                         (
                             (
                                 completed_tasks["completed_date"].max()
                                 - completed_tasks["completed_date"].min()
                             ).days
-                        )
+                        ) + 1
                     ),
                     0,
                 ),

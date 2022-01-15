@@ -49,6 +49,8 @@ def preprocess(dc: DataCollector) -> DataFrame:
         lambda x: color_code_to_hex[int(x)]["hex"]
     )
 
+    completed_tasks = completed_tasks.drop_duplicates().reset_index(drop=True)
+
     return completed_tasks
 
 
@@ -66,3 +68,9 @@ def get_data(token):
     completed_tasks = preprocess(dc)
 
     return completed_tasks
+
+def safe_divide(n, d):
+    if d == 0:
+        return 0
+    else:
+        return n / d
