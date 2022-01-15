@@ -78,7 +78,8 @@ def completed_tasks_per_day(completed_tasks: DataFrame) -> FigureWidget:
         go.Bar(
             x=daily_completed_tasks["completed_date"].astype(str),
             y=daily_completed_tasks["id"],
-            name="project_id",
+            name="Total",
+            hovertemplate="<b>Date: %{x}</b><br>%{y} tasks completed",
         )
     )
     fig.update_layout(
@@ -108,7 +109,11 @@ def completed_tasks_per_day_per_project(
         color="project_name",
         title="Daily completed tasks",
         color_discrete_map=color_palette,
-        labels={"project_name":"Project Name", "completed_date":"Date", "id":"Completed Tasks"}
+        labels={
+            "project_name": "Project Name",
+            "completed_date": "Date",
+            "id": "Completed Tasks",
+        },
     )
     fig.update_layout(barmode="relative", legend_title_text="Project Name")
 
@@ -142,9 +147,12 @@ def one_hundred_stacked_bar_plot_per_project(
         project_color = color_palette[project]
         fig.add_trace(
             go.Bar(
-                x=aux.index, y=aux[project], name=project, marker_color=project_color,
+                x=aux.index,
+                y=aux[project],
+                name=project,
+                marker_color=project_color,
                 hovertemplate="<b>Date: %{x}</b><br>%{customdata}% of total",
-                customdata=round(aux[project]*100,1)
+                customdata=round(aux[project] * 100, 1),
             )
         )
     # fig.update_traces(marker=dict(color=color_palette))
