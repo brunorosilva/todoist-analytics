@@ -13,8 +13,8 @@ app:
 
 # black and isort
 lint:  
-	black .
-	isort .
+	poetry run black .
+	poetry run isort .
 
 # build documentation 
 docs:
