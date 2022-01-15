@@ -60,6 +60,7 @@ def create_app():
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("# Habit Tracking")
+    st.markdown("The side panel filters do not affect this section")
 
     recurrent_tasks = get_recurrent_tasks(completed_tasks_habits)
     completed_tasks_habits = filter_recurrent_task(completed_tasks_habits, recurrent_tasks)
