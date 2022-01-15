@@ -187,3 +187,35 @@ def calendar_task_plot(completed_tasks: DataFrame) -> FigureWidget:
         plot_bgcolor=("#0e1117"),
     )
     return fig
+
+def calendar_habits_plot(completed_tasks_habits:DataFrame):
+    daily_completed_tasks = (
+        completed_tasks_habits[["completed_date", "project_id", "id", "content", "hex_color"]]
+        .groupby(["completed_date"], as_index=False)
+        .nunique()
+    )
+
+    daily_completed_tasks["completed_date"] = pd.to_datetime(
+        daily_completed_tasks["completed_date"]
+    )
+
+    # for this plot it'll be used a 100% colorscale
+    # therefore if any value is above 0, it'll be
+    # shown as the strongest color in the scale
+
+    custom_colorscale = [[0.0, 'rgb(200,200,200)'],[1.0, 'rgb(200,200,200)']]
+    fig = calplot(
+        daily_completed_tasks,
+        x="completed_date",
+        y="id",
+        name="Completed Recurrent Tasks",
+        dark_theme=True,
+        colorscale=custom_colorscale,
+        gap=0,
+        years_title=True,
+    )
+    fig.update_layout(
+        paper_bgcolor=("#0e1117"),
+        plot_bgcolor=("#0e1117"),
+    )
+    return fig

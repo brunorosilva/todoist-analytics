@@ -5,7 +5,7 @@ from todoist_analytics.backend.utils import *
 from todoist_analytics.credentials import token
 from todoist_analytics.frontend.filters import *
 from todoist_analytics.frontend.plots import *
-
+from todoist_analytics.frontend.habit_tracker import get_recurrent_tasks, filter_recurrent_task
 
 def create_app():
     st.set_page_config(page_title="Todoist Analytics")
@@ -60,12 +60,10 @@ def create_app():
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("# Habit Tracking")
-    completed_tasks_habits[completed_tasks_habits["isRecurrent"]==1].to_csv("recurrent.csv")
 
-
-
-    # recurrent_tasks = get_recurrent_tasks(completed_tasks_habits)
-    # completed_tasks_habits = filter_recurrent_task()
+    recurrent_tasks = get_recurrent_tasks(completed_tasks_habits)
+    completed_tasks_habits = filter_recurrent_task(completed_tasks_habits, recurrent_tasks)
+    st.plotly_chart(calendar_habits_plot(completed_tasks_habits), use_container_width=True)
 
 if __name__ == "__main__":
     app = create_app()
