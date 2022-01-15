@@ -25,7 +25,7 @@ def weekend_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
             ~(completed_tasks["completed_date_weekday"].isin(["Sunday", "Saturday"]))
         ]
 
-    return completed_tasks
+    return completed_tasks, remove_weekends
 
 
 def last_week_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
