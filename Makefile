@@ -16,6 +16,12 @@ lint:
 	poetry run black .
 	poetry run isort .
 
+checks:
+	@poetry run flake8 .
+	@poetry run vulture .
+	@poetry run poetry check
+	@poetry run safety check --full-report
+
 # build documentation 
 docs:
 	poetry run sphinx-build -a docs docs/site
