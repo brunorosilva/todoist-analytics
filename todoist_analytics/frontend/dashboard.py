@@ -1,14 +1,22 @@
-import numpy as np
 import streamlit as st
 
-from todoist_analytics.backend.utils import *
+from todoist_analytics.backend.utils import create_color_palette, get_data
 from todoist_analytics.credentials import token
-from todoist_analytics.frontend.filters import *
-from todoist_analytics.frontend.plots import *
-from todoist_analytics.frontend.habit_tracker import get_recurrent_tasks, filter_recurrent_task
+from todoist_analytics.frontend.filters import (date_filter, last_month_filter,
+                                                last_week_filter,
+                                                last_year_filter,
+                                                project_filter, weekend_filter)
+from todoist_analytics.frontend.habit_tracker import (filter_recurrent_task,
+                                                      get_recurrent_tasks)
+from todoist_analytics.frontend.plots import (
+    calendar_habits_plot, calendar_task_plot, completed_tasks_per_day,
+    completed_tasks_per_day_per_project, create_metrics_cards,
+    each_project_total_percentage_plot,
+    one_hundred_stacked_bar_plot_per_project)
+
 
 def create_app():
-    st.set_page_config(page_title="Todoist Analytics")
+    st.set_page_config(page_title="Todoist Analytics", layout="wide")
     st.title("Todoist Analytics Report")
 
     with st.spinner("Getting your data :)"):
@@ -45,8 +53,9 @@ def create_app():
         one_hundred_stacked_bar_plot_per_project(completed_tasks, color_palette)
     )
 
-    figs.append(calendar_task_plot(completed_tasks))
+    figs.append(each_project_total_percentage_plot(completed_tasks, color_palette))
 
+    figs.append(calendar_task_plot(completed_tasks))
 
     if remove_weekends:
         for fig in figs:
@@ -63,8 +72,13 @@ def create_app():
     st.markdown("The side panel filters do not affect this section")
 
     recurrent_tasks = get_recurrent_tasks(completed_tasks_habits)
-    completed_tasks_habits = filter_recurrent_task(completed_tasks_habits, recurrent_tasks)
-    st.plotly_chart(calendar_habits_plot(completed_tasks_habits), use_container_width=True)
+    completed_tasks_habits = filter_recurrent_task(
+        completed_tasks_habits, recurrent_tasks
+    )
+    st.plotly_chart(
+        calendar_habits_plot(completed_tasks_habits), use_container_width=True
+    )
+
 
 if __name__ == "__main__":
     app = create_app()

@@ -69,6 +69,7 @@ def get_data(token):
 
     return completed_tasks
 
+
 def safe_divide(n, d):
     if d == 0:
         return 0

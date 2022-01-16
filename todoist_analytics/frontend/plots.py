@@ -1,4 +1,3 @@
-import datetime
 from datetime import timedelta
 
 import numpy as np
@@ -7,8 +6,8 @@ import plotly.express as px
 import plotly.graph_objs as go
 from pandas import DataFrame
 from plotly.missing_ipywidgets import FigureWidget
-from plotly.subplots import make_subplots
 from plotly_calplot import calplot
+
 from ..backend.utils import safe_divide
 
 
@@ -32,15 +31,17 @@ def create_metrics_cards(completed_tasks: DataFrame, cols: list, remove_weekends
             int(
                 round(
                     safe_divide(
-                    len(completed_tasks)
-                    ,(
+                        len(completed_tasks),
                         (
-                            np.busday_count(
-                                completed_tasks["completed_date"].min(),
-                                completed_tasks["completed_date"].max(),
+                            (
+                                np.busday_count(
+                                    completed_tasks["completed_date"].min(),
+                                    completed_tasks["completed_date"].max(),
+                                )
                             )
-                        ) + 1
-                    )),
+                            + 1
+                        ),
+                    ),
                     0,
                 ),
             ),
@@ -57,7 +58,8 @@ def create_metrics_cards(completed_tasks: DataFrame, cols: list, remove_weekends
                                 completed_tasks["completed_date"].max()
                                 - completed_tasks["completed_date"].min()
                             ).days
-                        ) + 1
+                        )
+                        + 1
                     ),
                     0,
                 ),
@@ -181,6 +183,7 @@ def calendar_task_plot(completed_tasks: DataFrame) -> FigureWidget:
         colorscale="blues",
         gap=0,
         years_title=True,
+        title="Complete tasks Calendar view",
     )
     fig.update_layout(
         paper_bgcolor=("#0e1117"),
@@ -188,9 +191,65 @@ def calendar_task_plot(completed_tasks: DataFrame) -> FigureWidget:
     )
     return fig
 
-def calendar_habits_plot(completed_tasks_habits:DataFrame):
+
+def each_project_total_percentage_plot(
+    completed_tasks: DataFrame, color_palette: dict
+) -> FigureWidget:
+
+    daily_completed_tasks_per_project = (
+        completed_tasks[["project_id", "id", "project_name", "content", "hex_color"]]
+        .groupby(["project_name", "hex_color"], as_index=False)
+        .nunique()
+    )
+
+    daily_completed_tasks_per_project["pct_of_total"] = round(
+        (
+            daily_completed_tasks_per_project["id"].div(
+                daily_completed_tasks_per_project["id"].sum()
+            )
+            * 100
+        ),
+        1,
+    )
+
+    # this is lazy code writing, the right way to do this
+    # is to use graph_objects Bars (in loop) with texttemplate
+    # in order to add a percent sign after the value, but as
+    # I'm using plotly express, this is lazy way is much easier
+    daily_completed_tasks_per_project["pct_of_total_str"] = (
+        daily_completed_tasks_per_project["pct_of_total"].astype(str) + " %"
+    )
+
+    # TODO - add this plot to the above one as a subplot
+    # TODO - change from express to graph objects
+    fig = px.bar(
+        daily_completed_tasks_per_project,
+        x="pct_of_total",
+        y="project_id",
+        text="pct_of_total_str",
+        orientation="h",
+        color="project_name",
+        hover_data=["id"],
+        hover_name="project_name",
+        labels={
+            "pct_of_total": "% of total tasks",
+            "project_id": "",
+            "project_name": "Project",
+            "id": "tasks amount",
+        },
+        color_discrete_sequence=daily_completed_tasks_per_project["hex_color"],
+    )
+    fig.update_traces(textposition="inside")
+    fig.update_layout(title_text="Percentage of tasks per project")
+    fig.update_yaxes(visible=False)
+    return fig
+
+
+def calendar_habits_plot(completed_tasks_habits: DataFrame):
     daily_completed_tasks = (
-        completed_tasks_habits[["completed_date", "project_id", "id", "content", "hex_color"]]
+        completed_tasks_habits[
+            ["completed_date", "project_id", "id", "content", "hex_color"]
+        ]
         .groupby(["completed_date"], as_index=False)
         .nunique()
     )
@@ -203,7 +262,7 @@ def calendar_habits_plot(completed_tasks_habits:DataFrame):
     # therefore if any value is above 0, it'll be
     # shown as the strongest color in the scale
 
-    custom_colorscale = [[0.0, 'rgb(200,200,200)'],[1.0, 'rgb(200,200,200)']]
+    custom_colorscale = [[0.0, "rgb(200,200,200)"], [1.0, "rgb(200,200,200)"]]
     fig = calplot(
         daily_completed_tasks,
         x="completed_date",
