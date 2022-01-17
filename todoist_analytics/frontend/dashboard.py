@@ -10,7 +10,7 @@ from todoist_analytics.frontend.habit_tracker import (filter_recurrent_task,
                                                       get_recurrent_tasks)
 from todoist_analytics.frontend.plots import (
     calendar_habits_plot, calendar_task_plot, completed_tasks_per_day,
-    completed_tasks_per_day_per_project, create_metrics_cards,
+    completed_tasks_per_day_per_project, create_metrics_cards, day_of_week_ridgeline_plot,
     each_project_total_percentage_plot,
     one_hundred_stacked_bar_plot_per_project)
 
@@ -56,6 +56,8 @@ def create_app():
     figs.append(each_project_total_percentage_plot(completed_tasks, color_palette))
 
     figs.append(calendar_task_plot(completed_tasks))
+
+    figs.append(day_of_week_ridgeline_plot(completed_tasks))
 
     if remove_weekends:
         for fig in figs:
