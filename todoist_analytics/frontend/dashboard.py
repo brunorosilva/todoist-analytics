@@ -1,5 +1,5 @@
 import streamlit as st
-
+from PIL import Image
 from todoist_analytics.backend.utils import create_color_palette, get_data
 from todoist_analytics.credentials import token
 from todoist_analytics.frontend.filters import (date_filter, last_month_filter,
@@ -16,7 +16,8 @@ from todoist_analytics.frontend.plots import (
 
 
 def create_app():
-    st.set_page_config(page_title="Todoist Analytics", layout="wide")
+    todoist_logo = Image.open("assets/images/todoist_logo.png")
+    st.set_page_config(page_title="Todoist Analytics", layout="wide", page_icon=todoist_logo)
     st.title("Todoist Analytics Report")
 
     with st.spinner("Getting your data :)"):
@@ -80,6 +81,10 @@ def create_app():
     st.plotly_chart(
         calendar_habits_plot(completed_tasks_habits), use_container_width=True
     )
+
+    st.markdown("# Weekly Review")
+    st.markdown("The side panel filters do not affect this section")
+
 
 
 if __name__ == "__main__":
