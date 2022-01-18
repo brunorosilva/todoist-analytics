@@ -1,8 +1,9 @@
 # Todoist Analytics
 
 ![version](https://img.shields.io/badge/version-0.0.1-brightgreen)
-<img src='assets/images/todoist_analytics.png'>
-
+<p align=center>
+<img src='assets/images/analytics_logo.png' width=100>
+</p>
 <b>
 If you use Todoist for daily, weekly, monthly or yearly planning you should try this tool.
 </b>
@@ -37,15 +38,26 @@ Develop a Flask backend and a React frontend for better usage
 
 # Usage
 
-## Get your API Key
+## 1. Get your API Key
 Go to your Todoist settings into the integrations tab, at the bottom you'll find your API key, copy it.
 
-## Create your credentials.py file
+## 2. Create your credentials.py file
+
+### Method 1
+
+run 
 
 `$ make credentials`
 
-and if your credential file doesn't exist, you will be prompted to input your token.
+and fill out your token
 
-## Run the app
+### Method 2
+
+create a credentials.py file inside the todoist_analytics folder
+
+```python
+token = "abc123"
+```
+## 3. Run the app
 
 `$ make app`
