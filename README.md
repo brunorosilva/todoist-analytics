@@ -1,6 +1,7 @@
 # Todoist Analytics
 
-![version](https://img.shields.io/badge/version-0.0.0-brightgreen)
+![version](https://img.shields.io/badge/version-0.0.1-brightgreen)
+<img src='assets/images/todoist_analytics.png'>
 
 <b>
 If you use Todoist for daily, weekly, monthly or yearly planning you should try this tool.
@@ -8,7 +9,7 @@ If you use Todoist for daily, weekly, monthly or yearly planning you should try 
 
 This is how the current version of the tool looks like.
 
-<img src='assets/images/dashboard_sample.png'>
+<video src='assets/images/demo.webm'>
 
 
 The main goal for this tool is to help you keep track and create analytics based on your data from todoist.
