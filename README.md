@@ -9,7 +9,7 @@ If you use Todoist for daily, weekly, monthly or yearly planning you should try 
 
 This is how the current version of the tool looks like.
 
-<video src='assets/images/demo.webm'>
+<img src='assets/images/demo.gif'>
 
 
 The main goal for this tool is to help you keep track and create analytics based on your data from todoist.
