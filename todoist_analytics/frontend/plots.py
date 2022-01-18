@@ -85,6 +85,7 @@ def completed_tasks_per_day(completed_tasks: DataFrame) -> FigureWidget:
             y=daily_completed_tasks["id"],
             name="Total",
             hovertemplate="<b>Date: %{x}</b><br>%{y} tasks completed",
+            marker_line_width=0
         )
     )
     fig.update_layout(
@@ -120,6 +121,8 @@ def completed_tasks_per_day_per_project(
             "id": "Completed Tasks",
         },
     )
+    fig.update_traces(
+            marker_line_width=0)
     fig.update_layout(barmode="relative", legend_title_text="Project Name")
 
     return fig
@@ -158,6 +161,7 @@ def one_hundred_stacked_bar_plot_per_project(
                 marker_color=project_color,
                 hovertemplate="<b>Date: %{x}</b><br>%{customdata}% of total",
                 customdata=round(aux[project] * 100, 1),
+            marker_line_width=0
             )
         )
     # fig.update_traces(marker=dict(color=color_palette))
