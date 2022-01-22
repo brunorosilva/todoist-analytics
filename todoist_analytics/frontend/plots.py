@@ -5,9 +5,9 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 from pandas import DataFrame
+from plotly.colors import n_colors
 from plotly.missing_ipywidgets import FigureWidget
 from plotly_calplot import calplot
-from plotly.colors import n_colors
 
 from ..backend.utils import safe_divide
 
@@ -85,7 +85,7 @@ def completed_tasks_per_day(completed_tasks: DataFrame) -> FigureWidget:
             y=daily_completed_tasks["id"],
             name="Total",
             hovertemplate="<b>Date: %{x}</b><br>%{y} tasks completed",
-            marker_line_width=0
+            marker_line_width=0,
         )
     )
     fig.update_layout(
@@ -121,8 +121,7 @@ def completed_tasks_per_day_per_project(
             "id": "Completed Tasks",
         },
     )
-    fig.update_traces(
-            marker_line_width=0)
+    fig.update_traces(marker_line_width=0)
     fig.update_layout(barmode="relative", legend_title_text="Project Name")
 
     return fig
@@ -161,7 +160,7 @@ def one_hundred_stacked_bar_plot_per_project(
                 marker_color=project_color,
                 hovertemplate="<b>Date: %{x}</b><br>%{customdata}% of total",
                 customdata=round(aux[project] * 100, 1),
-            marker_line_width=0
+                marker_line_width=0,
             )
         )
     # fig.update_traces(marker=dict(color=color_palette))
@@ -228,7 +227,9 @@ def each_project_total_percentage_plot(
     # TODO - add this plot to the above one as a subplot
     # TODO - change from express to graph objects
     # TODO - fix the color (duplicated project names break colors)
-    daily_completed_tasks_per_project["project_id"] = daily_completed_tasks_per_project["project_id"].astype(str)
+    daily_completed_tasks_per_project["project_id"] = daily_completed_tasks_per_project[
+        "project_id"
+    ].astype(str)
     daily_completed_tasks_per_project["zero"] = 0
     fig = px.bar(
         daily_completed_tasks_per_project,
@@ -247,7 +248,7 @@ def each_project_total_percentage_plot(
         },
         color_discrete_sequence=daily_completed_tasks_per_project["hex_color"],
     )
-    
+
     fig.update_traces(textposition="inside")
     fig.update_layout(title_text="Percentage of tasks per project")
     fig.update_yaxes(visible=False)
@@ -288,7 +289,8 @@ def calendar_habits_plot(completed_tasks_habits: DataFrame):
     )
     return fig
 
-def day_of_week_ridgeline_plot(completed_tasks:DataFrame):
+
+def day_of_week_ridgeline_plot(completed_tasks: DataFrame):
     colors = n_colors("rgb(230,230,250)", "rgb(100,230,250)", 7, colortype="rgb")
 
     # rigdeline plot
@@ -302,18 +304,35 @@ def day_of_week_ridgeline_plot(completed_tasks:DataFrame):
         daily_completed_tasks["completed_date"]
     )
 
-    daily_completed_tasks["weekday"] = daily_completed_tasks["completed_date"].dt.weekday
-    daily_completed_tasks["weekday_name"] = daily_completed_tasks["completed_date"].dt.day_name()
-    
+    daily_completed_tasks["weekday"] = daily_completed_tasks[
+        "completed_date"
+    ].dt.weekday
+    daily_completed_tasks["weekday_name"] = daily_completed_tasks[
+        "completed_date"
+    ].dt.day_name()
+
     fig = go.Figure()
-    for i, weekday in enumerate(sorted(daily_completed_tasks["weekday"].unique(), reverse=True)):
-        average_of_weekday = round(daily_completed_tasks.loc[daily_completed_tasks["weekday"] == weekday]["id"].mean(), 1)
-        daily_completed_tasks["weekday_name_with_average"] = daily_completed_tasks["weekday_name"].apply(lambda x:str(x) + "<br>average " + str(average_of_weekday))
+    for i, weekday in enumerate(
+        sorted(daily_completed_tasks["weekday"].unique(), reverse=True)
+    ):
+        average_of_weekday = round(
+            daily_completed_tasks.loc[daily_completed_tasks["weekday"] == weekday][
+                "id"
+            ].mean(),
+            1,
+        )
+        daily_completed_tasks["weekday_name_with_average"] = daily_completed_tasks[
+            "weekday_name"
+        ].apply(lambda x: str(x) + "<br>average " + str(average_of_weekday))
 
         fig.add_trace(
             go.Violin(
-                x=daily_completed_tasks.loc[daily_completed_tasks["weekday"] == weekday]["id"],
-                y=daily_completed_tasks.loc[daily_completed_tasks["weekday"] == weekday]["weekday_name_with_average"],
+                x=daily_completed_tasks.loc[
+                    daily_completed_tasks["weekday"] == weekday
+                ]["id"],
+                y=daily_completed_tasks.loc[
+                    daily_completed_tasks["weekday"] == weekday
+                ]["weekday_name_with_average"],
                 line_color=colors[i],
                 orientation="h",
                 side="positive",
@@ -323,12 +342,10 @@ def day_of_week_ridgeline_plot(completed_tasks:DataFrame):
             )
         )
     fig.update_traces(points=False, spanmode="hard")
-    fig.update_layout(title="completed tasks per weekday", showlegend=False, 
-    xaxis=dict(
-        tickmode="linear",
-        tick0=1,
-        dtick=1,
-        showgrid=False
-    ))
+    fig.update_layout(
+        title="completed tasks per weekday",
+        showlegend=False,
+        xaxis=dict(tickmode="linear", tick0=1, dtick=1, showgrid=False),
+    )
     fig.update_xaxes(rangemode="tozero")
     return fig

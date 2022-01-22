@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+
 from todoist_analytics.backend.utils import create_color_palette, get_data
 from todoist_analytics.credentials import token
 from todoist_analytics.frontend.filters import (date_filter, last_month_filter,
@@ -10,14 +11,16 @@ from todoist_analytics.frontend.habit_tracker import (filter_recurrent_task,
                                                       get_recurrent_tasks)
 from todoist_analytics.frontend.plots import (
     calendar_habits_plot, calendar_task_plot, completed_tasks_per_day,
-    completed_tasks_per_day_per_project, create_metrics_cards, day_of_week_ridgeline_plot,
-    each_project_total_percentage_plot,
+    completed_tasks_per_day_per_project, create_metrics_cards,
+    day_of_week_ridgeline_plot, each_project_total_percentage_plot,
     one_hundred_stacked_bar_plot_per_project)
 
 
 def create_app():
     todoist_logo = Image.open("assets/images/todoist_logo.png")
-    st.set_page_config(page_title="Todoist Analytics", layout="wide", page_icon=todoist_logo)
+    st.set_page_config(
+        page_title="Todoist Analytics", layout="wide", page_icon=todoist_logo
+    )
     st.title("Todoist Analytics Report")
 
     with st.spinner("Getting your data :)"):
@@ -81,7 +84,6 @@ def create_app():
     st.plotly_chart(
         calendar_habits_plot(completed_tasks_habits), use_container_width=True
     )
-
 
 
 if __name__ == "__main__":
