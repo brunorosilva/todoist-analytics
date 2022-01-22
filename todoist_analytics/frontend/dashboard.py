@@ -82,9 +82,6 @@ def create_app():
         calendar_habits_plot(completed_tasks_habits), use_container_width=True
     )
 
-    st.markdown("# Weekly Review")
-    st.markdown("The side panel filters do not affect this section")
-
 
 
 if __name__ == "__main__":
