@@ -4,6 +4,7 @@ from PIL import Image
 from todoist_analytics.backend.utils import create_color_palette, get_data
 from todoist_analytics.credentials import token
 from todoist_analytics.frontend.filters import (date_filter, last_month_filter,
+                                                last_seven_days_filter,
                                                 last_week_filter,
                                                 last_year_filter,
                                                 project_filter, weekend_filter)
@@ -29,6 +30,7 @@ def create_app():
 
     completed_tasks = date_filter(completed_tasks, "date range filter")
     completed_tasks = last_week_filter(completed_tasks, "filter current week")
+    completed_tasks = last_seven_days_filter(completed_tasks, "filter last seven days")
     completed_tasks = last_month_filter(completed_tasks, "filter current month")
     completed_tasks = last_year_filter(completed_tasks, "filter current year")
     completed_tasks, remove_weekends = weekend_filter(
