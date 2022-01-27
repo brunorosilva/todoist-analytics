@@ -9,7 +9,7 @@ credentials:
 	[ -f ./todoist_analytics/credentials.py ] && echo credentials ok || $(MAKE) get_token
 
 app:
-	poetry run streamlit run streamlit_app.py
+	poetry run streamlit run streamlit_app.py --server.port 8080
 
 # black and isort
 lint:  
@@ -37,3 +37,9 @@ pages:
 # create rst source for API documentation
 apidoc:
 	sphinx-apidoc -o docs src/{{package}}
+
+
+container:
+	@poetry build
+	@docker build -t todoist_analytics .
+	@docker run -p 8080:8080 todoist_analytics
