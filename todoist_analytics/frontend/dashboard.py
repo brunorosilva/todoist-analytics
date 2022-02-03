@@ -1,8 +1,9 @@
 import streamlit as st
 from PIL import Image
 
+from todoist_analytics.backend.auth import get_auth, get_token
 from todoist_analytics.backend.utils import create_color_palette, get_data
-from todoist_analytics.credentials import token
+from todoist_analytics.credentials import client_id, client_secret
 from todoist_analytics.frontend.filters import (date_filter, last_month_filter,
                                                 last_seven_days_filter,
                                                 last_week_filter,
@@ -15,7 +16,8 @@ from todoist_analytics.frontend.plots import (
     completed_tasks_per_day_per_project, create_metrics_cards,
     day_of_week_ridgeline_plot, each_project_total_percentage_plot,
     one_hundred_stacked_bar_plot_per_project)
-
+import asyncio
+from todoist_analytics.backend import session_state
 
 def create_app():
     todoist_logo = Image.open("assets/images/todoist_logo.png")
@@ -24,68 +26,96 @@ def create_app():
     )
     st.title("Todoist Analytics Report")
 
-    with st.spinner("Getting your data :)"):
-        completed_tasks = get_data(token)
-        completed_tasks_habits = completed_tasks.copy()
+    auth_url = asyncio.run(get_auth(client_id, client_secret))
+    session = session_state.get(token=None)
 
-    completed_tasks = date_filter(completed_tasks, "date range filter")
-    completed_tasks = last_week_filter(completed_tasks, "filter current week")
-    completed_tasks = last_seven_days_filter(completed_tasks, "filter last seven days")
-    completed_tasks = last_month_filter(completed_tasks, "filter current month")
-    completed_tasks = last_year_filter(completed_tasks, "filter current year")
-    completed_tasks, remove_weekends = weekend_filter(
-        completed_tasks, "remove weekends"
-    )
-    completed_tasks = project_filter(completed_tasks, "select the desired project")
+    if session.token is None:
+        try:
+            code = st.experimental_get_query_params()['code']
+        except:
+            st.write(f'''<h1>
+            Please login using this <a target="_self"
+            href="{auth_url}">url</a></h1>''',
+                unsafe_allow_html=True)
+        else:
+            try:
+                token = asyncio.run(get_token(client_id, client_secret))
+            except:
+                st.write(f'''<h1>
+                    This account is not allowed or page was refreshed.
+                    Please try again: <a target="_self"
+                    href="{auth_url}">url</a></h1>''',
+                         unsafe_allow_html=True)
+            else:
+                session_state.token = token
 
-    create_metrics_cards(completed_tasks, list(st.columns(4)), remove_weekends)
+    try:
+        with st.spinner("Getting your data :)"):
 
-    st.markdown(
-        f"Analyzing data since {completed_tasks.completed_date.min()} until {completed_tasks.completed_date.max()}"
-    )
+            completed_tasks = get_data(token)
+            completed_tasks_habits = completed_tasks.copy()
 
-    completed_tasks_radio = st.radio("Choose your view", ["total", "per project"])
+        completed_tasks = date_filter(completed_tasks, "date range filter")
+        completed_tasks = last_week_filter(completed_tasks, "filter current week")
+        completed_tasks = last_seven_days_filter(completed_tasks, "filter last seven days")
+        completed_tasks = last_month_filter(completed_tasks, "filter current month")
+        completed_tasks = last_year_filter(completed_tasks, "filter current year")
+        completed_tasks, remove_weekends = weekend_filter(
+            completed_tasks, "remove weekends"
+        )
+        completed_tasks = project_filter(completed_tasks, "select the desired project")
 
-    color_palette = create_color_palette(completed_tasks)
+        create_metrics_cards(completed_tasks, list(st.columns(4)), remove_weekends)
 
-    figs = []
-    if completed_tasks_radio == "total":
-        figs.append(completed_tasks_per_day(completed_tasks))
-    else:
+        st.markdown(
+            f"Analyzing data since {completed_tasks.completed_date.min()} until {completed_tasks.completed_date.max()}"
+        )
 
-        figs.append(completed_tasks_per_day_per_project(completed_tasks, color_palette))
+        completed_tasks_radio = st.radio("Choose your view", ["total", "per project"])
 
-    figs.append(
-        one_hundred_stacked_bar_plot_per_project(completed_tasks, color_palette)
-    )
+        color_palette = create_color_palette(completed_tasks)
 
-    figs.append(each_project_total_percentage_plot(completed_tasks, color_palette))
+        figs = []
+        if completed_tasks_radio == "total":
+            figs.append(completed_tasks_per_day(completed_tasks))
+        else:
 
-    figs.append(calendar_task_plot(completed_tasks))
+            figs.append(completed_tasks_per_day_per_project(completed_tasks, color_palette))
 
-    figs.append(day_of_week_ridgeline_plot(completed_tasks))
+        figs.append(
+            one_hundred_stacked_bar_plot_per_project(completed_tasks, color_palette)
+        )
 
-    if remove_weekends:
+        figs.append(each_project_total_percentage_plot(completed_tasks, color_palette))
+
+        figs.append(calendar_task_plot(completed_tasks))
+
+        figs.append(day_of_week_ridgeline_plot(completed_tasks))
+
+        if remove_weekends:
+            for fig in figs:
+                fig.update_xaxes(
+                    rangebreaks=[
+                        {"pattern": "day of week", "bounds": [6, 1]},
+                    ]
+                )
+
         for fig in figs:
-            fig.update_xaxes(
-                rangebreaks=[
-                    {"pattern": "day of week", "bounds": [6, 1]},
-                ]
-            )
+            st.plotly_chart(fig, use_container_width=True)
 
-    for fig in figs:
-        st.plotly_chart(fig, use_container_width=True)
+        st.markdown("# Habit Tracking")
+        st.markdown("The side panel filters do not affect this section")
 
-    st.markdown("# Habit Tracking")
-    st.markdown("The side panel filters do not affect this section")
+        recurrent_tasks = get_recurrent_tasks(completed_tasks_habits)
+        completed_tasks_habits = filter_recurrent_task(
+            completed_tasks_habits, recurrent_tasks
+        )
+        st.plotly_chart(
+            calendar_habits_plot(completed_tasks_habits), use_container_width=True
+        )
 
-    recurrent_tasks = get_recurrent_tasks(completed_tasks_habits)
-    completed_tasks_habits = filter_recurrent_task(
-        completed_tasks_habits, recurrent_tasks
-    )
-    st.plotly_chart(
-        calendar_habits_plot(completed_tasks_habits), use_container_width=True
-    )
+    except:
+        pass
 
 
 if __name__ == "__main__":
