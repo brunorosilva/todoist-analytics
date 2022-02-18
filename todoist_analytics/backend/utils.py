@@ -64,10 +64,11 @@ def create_color_palette(completed_tasks: DataFrame):
 @st.cache(show_spinner=False)  # caching the data and hiding the spinner warning
 def get_data(token):
     dc = DataCollector(token)
-    dc.collect_all()
+    dc._collect_all_completed_tasks()
     completed_tasks = preprocess(dc)
-
-    return completed_tasks
+    dc._collect_active_tasks()
+    active_tasks = dc.active_tasks
+    return completed_tasks, active_tasks
 
 
 def safe_divide(n, d):

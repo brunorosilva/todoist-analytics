@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 
-from todoist_analytics.backend.auth import get_auth, get_token
+from todoist_analytics.backend.auth import run_auth
 from todoist_analytics.backend.utils import create_color_palette, get_data
 from todoist_analytics.credentials import client_id, client_secret
 from todoist_analytics.frontend.filters import (date_filter, last_month_filter,
@@ -16,8 +16,7 @@ from todoist_analytics.frontend.plots import (
     completed_tasks_per_day_per_project, create_metrics_cards,
     day_of_week_ridgeline_plot, each_project_total_percentage_plot,
     one_hundred_stacked_bar_plot_per_project)
-import asyncio
-from todoist_analytics.backend import session_state
+
 
 def create_app():
     todoist_logo = Image.open("assets/images/todoist_logo.png")
@@ -26,38 +25,20 @@ def create_app():
     )
     st.title("Todoist Analytics Report")
 
-    auth_url = asyncio.run(get_auth(client_id, client_secret))
-    session = session_state.get(token=None)
+    token = run_auth(client_id=client_id, client_secret=client_secret)
 
-    if session.token is None:
-        try:
-            code = st.experimental_get_query_params()['code']
-        except:
-            st.write(f'''<h1>
-            Please login using this <a target="_self"
-            href="{auth_url}">url</a></h1>''',
-                unsafe_allow_html=True)
-        else:
-            try:
-                token = asyncio.run(get_token(client_id, client_secret))
-            except:
-                st.write(f'''<h1>
-                    This account is not allowed or page was refreshed.
-                    Please try again: <a target="_self"
-                    href="{auth_url}">url</a></h1>''',
-                         unsafe_allow_html=True)
-            else:
-                session_state.token = token
+    if token is not None:
 
-    try:
         with st.spinner("Getting your data :)"):
 
-            completed_tasks = get_data(token)
+            completed_tasks, active_tasks = get_data(token)
             completed_tasks_habits = completed_tasks.copy()
 
         completed_tasks = date_filter(completed_tasks, "date range filter")
         completed_tasks = last_week_filter(completed_tasks, "filter current week")
-        completed_tasks = last_seven_days_filter(completed_tasks, "filter last seven days")
+        completed_tasks = last_seven_days_filter(
+            completed_tasks, "filter last seven days"
+        )
         completed_tasks = last_month_filter(completed_tasks, "filter current month")
         completed_tasks = last_year_filter(completed_tasks, "filter current year")
         completed_tasks, remove_weekends = weekend_filter(
@@ -80,7 +61,9 @@ def create_app():
             figs.append(completed_tasks_per_day(completed_tasks))
         else:
 
-            figs.append(completed_tasks_per_day_per_project(completed_tasks, color_palette))
+            figs.append(
+                completed_tasks_per_day_per_project(completed_tasks, color_palette)
+            )
 
         figs.append(
             one_hundred_stacked_bar_plot_per_project(completed_tasks, color_palette)
@@ -113,9 +96,6 @@ def create_app():
         st.plotly_chart(
             calendar_habits_plot(completed_tasks_habits), use_container_width=True
         )
-
-    except:
-        pass
 
 
 if __name__ == "__main__":
