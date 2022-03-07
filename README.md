@@ -1,8 +1,12 @@
 # Todoist Analytics
 
 ![version](https://img.shields.io/badge/version-0.0.1-brightgreen)
+
+# MVP available
+[Click here and authorize it](https://todoist-analytics-mvp.herokuapp.com/)
+
 <p align=center>
-<img src='assets/images/analytics_logo.png' width=100>
+<img src='assets/images/analytics_logo.png' width=200>
 </p>
 <b>
 If you use Todoist for daily, weekly, monthly or yearly planning you should try this tool.
