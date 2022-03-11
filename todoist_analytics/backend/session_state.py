@@ -21,6 +21,7 @@ result:
 """
 import streamlit.report_thread as ReportThread
 from streamlit.server.server import Server
+import sys
 
 
 class SessionState(object):
@@ -71,6 +72,7 @@ def get(**kwargs):
     this_session = None
 
     current_server = Server.get_current()
+
     if hasattr(current_server, "_session_infos"):
         # Streamlit < 0.56
         session_infos = Server.get_current()._session_infos.values()
