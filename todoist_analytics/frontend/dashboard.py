@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image
 
 from todoist_analytics.backend.auth import run_auth
-from todoist_analytics.backend.data_collector import DataCollector
 from todoist_analytics.backend.utils import (create_color_palette, get_data,
                                              get_more_data)
 from todoist_analytics.credentials import client_id, client_secret
