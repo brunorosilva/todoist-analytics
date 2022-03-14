@@ -15,9 +15,14 @@ def preprocess(dc: DataCollector) -> DataFrame:
     completed_tasks["datehour_completed"] = pd.to_datetime(
         completed_tasks["completed_date"]
     )
-    completed_tasks["datehour_completed"] = pd.DatetimeIndex(
-        completed_tasks["datehour_completed"]
-    ).tz_convert("America/Sao_Paulo")
+
+    dc.get_user_timezone()
+    try:
+        completed_tasks["datehour_completed"] = pd.DatetimeIndex(
+            completed_tasks["datehour_completed"]
+        ).tz_convert(dc.tz)
+    except:
+        pass
     completed_tasks["completed_date"] = pd.to_datetime(
         completed_tasks["datehour_completed"]
     ).dt.date
@@ -61,10 +66,21 @@ def create_color_palette(completed_tasks: DataFrame):
     return project_id_color
 
 
-@st.cache(show_spinner=False)  # caching the data and hiding the spinner warning
+@st.cache(
+    show_spinner=False, allow_output_mutation=True
+)  # caching the data and hiding the spinner warning
 def get_data(token):
     dc = DataCollector(token)
     dc._collect_all_completed_tasks()
+    completed_tasks = preprocess(dc)
+    dc._collect_active_tasks()
+    active_tasks = dc.active_tasks
+    return completed_tasks, active_tasks, dc
+
+
+def get_more_data(dc, n_calls):
+    limit = 2000 * n_calls
+    dc._collect_all_completed_tasks(limit=limit)
     completed_tasks = preprocess(dc)
     dc._collect_active_tasks()
     active_tasks = dc.active_tasks
