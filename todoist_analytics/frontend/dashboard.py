@@ -2,7 +2,9 @@ import streamlit as st
 from PIL import Image
 
 from todoist_analytics.backend.auth import run_auth
-from todoist_analytics.backend.utils import create_color_palette, get_data
+from todoist_analytics.backend.data_collector import DataCollector
+from todoist_analytics.backend.utils import (create_color_palette, get_data,
+                                             get_more_data)
 from todoist_analytics.credentials import client_id, client_secret
 from todoist_analytics.frontend.filters import (date_filter, last_month_filter,
                                                 last_seven_days_filter,
@@ -19,6 +21,9 @@ from todoist_analytics.frontend.plots import (
 
 
 def create_app():
+    if "n_calls" not in st.session_state:
+        st.session_state.n_calls = 1
+
     todoist_logo = Image.open("assets/images/todoist_logo.png")
     st.set_page_config(
         page_title="Todoist Analytics", layout="wide", page_icon=todoist_logo
@@ -28,11 +33,18 @@ def create_app():
     token = run_auth(client_id=client_id, client_secret=client_secret)
 
     if token is not None:
-
         with st.spinner("Getting your data :)"):
-
-            completed_tasks, active_tasks = get_data(token)
+            completed_tasks, active_tasks, dc = get_data(token)
             completed_tasks_habits = completed_tasks.copy()
+
+        get_more_data_button = st.sidebar.button("Click here to get more of your data")
+        if get_more_data_button:
+            with st.spinner("Getting more data!"):
+                st.session_state.n_calls += 1
+                completed_tasks, active_tasks = get_more_data(
+                    dc, n_calls=st.session_state.n_calls
+                )
+                completed_tasks_habits = completed_tasks.copy()
 
         completed_tasks = date_filter(completed_tasks, "date range filter")
         completed_tasks = last_week_filter(completed_tasks, "filter current week")

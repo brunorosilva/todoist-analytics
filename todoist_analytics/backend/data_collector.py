@@ -8,9 +8,12 @@ class DataCollector:
         self.token = token
         self.items = pd.DataFrame()
         self.projects = pd.DataFrame()
-        self.got_all_tasks = False
         self.api = todoist.TodoistAPI(self.token)
         self.api.sync()
+        self.current_offset = 0
+
+    def get_user_timezone(self):
+        self.tz = self.api.state["user"]["tz_info"]["timezone"]
 
     def _collect_active_tasks(self):
         pass
@@ -25,21 +28,24 @@ class DataCollector:
             pd.DataFrame.from_dict(data["projects"], orient="index")
         )
 
-    def _collect_all_completed_tasks(self):
+    def _collect_all_completed_tasks(self, limit=2000):
         """
         gets all the tasks and stores it
+        this function may take too long to complete and timeout,
+        a limit is set in order to prevent this
         """
-        self.got_all_tasks = False
-        i = 0
+        stop_collecting = False
         old_shape = 0
-        while not self.got_all_tasks:
-            self._collect_completed_tasks(limit=200, offset=i)
+
+        while not stop_collecting:
+            self._collect_completed_tasks(limit=200, offset=self.current_offset)
             new_shape = self.items.shape[0]
-            if new_shape != old_shape:
+            if new_shape != old_shape and new_shape < limit:
                 old_shape = new_shape
-                i += 200
+                self.current_offset += 200
             else:
-                self.got_all_tasks = True
+                self.current_offset = new_shape
+                stop_collecting = True
 
     def _state_to_dataframe(self, state, key):
         f = [d.data for d in state[str(key)]]

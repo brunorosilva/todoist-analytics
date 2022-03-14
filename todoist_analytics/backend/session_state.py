@@ -19,9 +19,10 @@ result:
 >>> session_state.user_name
 'Mary'
 """
+import sys
+
 import streamlit.report_thread as ReportThread
 from streamlit.server.server import Server
-import sys
 
 
 class SessionState(object):
