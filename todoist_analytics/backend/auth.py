@@ -1,4 +1,5 @@
 import asyncio
+import pdb
 
 import requests
 import streamlit as st
@@ -28,6 +29,7 @@ def run_auth(client_id, client_secret):
 
     # auth stuff
     auth_url = asyncio.run(get_auth(client_id, client_secret))
+    pdb.set_trace()
     session = session_state.get(token=None)
 
     if session.token is None:
