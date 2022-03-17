@@ -1,8 +1,9 @@
-import pandas as pd
-import streamlit as st
-import todoist
-from todoist_analytics.frontend.colorscale import color_code_to_hex
 import numpy as np
+import pandas as pd
+import todoist
+
+from todoist_analytics.frontend.colorscale import color_code_to_hex
+
 
 class DataCollector:
     def __init__(self, token):
@@ -11,6 +12,7 @@ class DataCollector:
         self.projects = pd.DataFrame()
         self.api = todoist.TodoistAPI(self.token)
         self.api.sync()
+        self.current_offset = 0
 
     def get_user_timezone(self):
         self.tz = self.api.state["user"]["tz_info"]["timezone"]
@@ -20,17 +22,18 @@ class DataCollector:
 
     def _collect_completed_tasks(self, limit, offset):
         data = self.api.completed.get_all(limit=limit, offset=offset)
-        print(len(data["items"]))
-        self._append_to_properties(data)
+        if len(data["items"]) != 0:
+            self._append_to_properties(data)
 
     def _append_to_properties(self, data):
-        preprocessed_items, preprocessed_projects = self._preprocess_completed_tasks(pd.DataFrame(data["items"]), pd.DataFrame.from_dict(data["projects"], orient="index"))
-        self.items = self.items.append(preprocessed_items)
-        self.projects = self.projects.append(
-            preprocessed_projects
+        preprocessed_items, preprocessed_projects = self._preprocess_completed_tasks(
+            pd.DataFrame(data["items"]),
+            pd.DataFrame.from_dict(data["projects"], orient="index"),
         )
+        self.items = self.items.append(preprocessed_items)
+        self.projects = self.projects.append(preprocessed_projects)
 
-    def _collect_all_completed_tasks(self, limit=2000):
+    def _collect_all_completed_tasks(self, limit=10000):
         """
         gets all the tasks and stores it
         this function may take too long to complete and timeout,
@@ -70,8 +73,9 @@ class DataCollector:
         ]
         self.active_tasks = self.active_tasks[keep_columns]
         self.active_tasks = self.active_tasks.loc[self.active_tasks["checked"] == 0]
-    
+
     def _preprocess_completed_tasks(self, completed_tasks, projects):
+
         projects = projects.rename({"id": "project_id"}, axis=1)
 
         completed_tasks["datehour_completed"] = pd.to_datetime(
@@ -79,7 +83,7 @@ class DataCollector:
         )
 
         self.get_user_timezone()
-        
+
         completed_tasks["datehour_completed"] = pd.DatetimeIndex(
             completed_tasks["datehour_completed"]
         ).tz_convert(self.tz)
