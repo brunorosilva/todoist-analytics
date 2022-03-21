@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import pandas as pd
 import todoist
@@ -22,8 +24,12 @@ class DataCollector:
 
     def _collect_completed_tasks(self, limit, offset):
         data = self.api.completed.get_all(limit=limit, offset=offset)
-        if len(data["items"]) != 0:
-            self._append_to_properties(data)
+        if data == "Service Unavailable\n":
+            time.sleep(3)
+            data = self._collect_completed_tasks(limit, offset)
+        else:
+            if len(data["items"]) != 0:
+                self._append_to_properties(data)
 
     def _append_to_properties(self, data):
         preprocessed_items, preprocessed_projects = self._preprocess_completed_tasks(
