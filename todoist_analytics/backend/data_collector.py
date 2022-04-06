@@ -100,7 +100,7 @@ class DataCollector:
             completed_tasks["datehour_completed"]
         ).dt.day_name()
         completed_tasks = completed_tasks.merge(
-            projects[["project_id", "name", "color", "inbox_project"]],
+            projects[["project_id", "name", "color"]],
             how="left",
             left_on="project_id",
             right_on="project_id",
