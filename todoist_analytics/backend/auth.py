@@ -8,7 +8,9 @@ from todoist_analytics.backend import session_state
 
 async def get_auth(client_id, client_secret):
 
-    authorization_url = f"https://todoist.com/oauth/authorize?client_id={client_id}&scope=data:read&state={client_secret}"
+    authorization_url = f"https://todoist.com/oauth/authorize?" \
+                        f"client_id={client_id}&" \
+                        f"scope=data:read&state={client_secret}"
     # res = requests.get(authorization_url)
     return authorization_url
 

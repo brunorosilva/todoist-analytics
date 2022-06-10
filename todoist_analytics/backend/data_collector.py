@@ -15,18 +15,15 @@ class DataCollector:
         self.api = todoist.TodoistAPI(self.token)
         self.api.sync()
         self.current_offset = 0
-
-    def get_user_timezone(self):
         self.tz = self.api.state["user"]["tz_info"]["timezone"]
-
-    def _collect_active_tasks(self):
-        pass
+        self._collect_all_completed_tasks()
+        self._collect_active_tasks()
 
     def _collect_completed_tasks(self, limit, offset):
         data = self.api.completed.get_all(limit=limit, offset=offset)
         if data == "Service Unavailable\n":
             time.sleep(3)
-            data = self._collect_completed_tasks(limit, offset)
+            self._collect_completed_tasks(limit, offset)
         else:
             if len(data["items"]) != 0:
                 self._append_to_properties(data)
@@ -58,13 +55,8 @@ class DataCollector:
                 self.current_offset = new_shape
                 stop_collecting = True
 
-    def _state_to_dataframe(self, state, key):
-        f = [d.data for d in state[str(key)]]
-        f = pd.DataFrame(f)
-        return f
-
     def _collect_active_tasks(self):
-        self.active_tasks = self._state_to_dataframe(self.api.state, "items")
+        self.active_tasks = pd.DataFrame([d.data for d in self.api.state["items"]])  # State to dataframe
         keep_columns = [
             "checked",
             "content",
@@ -87,8 +79,6 @@ class DataCollector:
         completed_tasks["datehour_completed"] = pd.to_datetime(
             completed_tasks["completed_date"]
         )
-
-        self.get_user_timezone()
 
         completed_tasks["datehour_completed"] = pd.DatetimeIndex(
             completed_tasks["datehour_completed"]
