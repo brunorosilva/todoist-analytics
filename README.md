@@ -1,48 +1,24 @@
 # Todoist Analytics
 
-![version](https://img.shields.io/badge/version-0.0.1-brightgreen)
+The main goal for this tool is to help you visualize, analyze and get insights about your todoist tasks. 
 
-# MVP available
-[Click here and authorize it](https://todoist-analytics-mvp.herokuapp.com/)
+![Analytics logo](img/analytics_logo_300x300.png)
 
-<p align=center>
-<img src='assets/images/analytics_logo.png' width=200>
-</p>
-<b>
-If you use Todoist for daily, weekly, monthly or yearly planning you should try this tool.
-</b>
+I always wanted to have something like this in todoist or with an integration, but I couldn't find any good solutions. 
+After a while I found [this project](https://github.com/brunorosilva/todoist-analytics) from Bruno Chicelli,
+that finally satisfied my curiosity. However, I wanted more features, and I wanted to make it my own.
+So I decided to build starting from his ideas and code to include some additional things I always wanted to have.
 
-This is how the current version of the tool looks like.
+## Pending tasks
 
-<img src='assets/images/demo.gif'>
+- [X] Simplify code and remove tools that I don't use
+- [ ] Instructions for running this tool locally
+- [ ] Instructions for running this tool using docker
+- [ ] Deploy it to a server (and create pipeline) so others can use the most recent version
 
+## Ideas of new features
 
-The main goal for this tool is to help you keep track and create analytics based on your data from todoist.
-
-
---- MVP ---
-- [x] Part 0: Transform this into a real todoist app (using the API OAuth)
-
-- [x] Part 1: Getting the data
-  
-  Create an application that calls the Todoist API and gets all done and tbd tasks from an user
-- [ ] Part 2: Weekly review tab
-  
-  From the gattered data create a dashboard with info from the user's last week plus some insights
-- [ ] Part 3: Monthly review tab
-  
-  Personalized insights and monthly reviews (:
-
---- Post-MVP ---
-- [ ] Part 4: Drop Streamlit
-Develop a Flask backend and a React frontend for better usage
-
-- [ ] Part 5: Cloud it up
-
-
-
-# Usage
-
-Go to the project page and authorize it, this will allow read-only benefits to the app.
-
-[Click here and authorize it](https://todoist-analytics-mvp.herokuapp.com/)
+- [ ] New habit reports (Weekly, Monthly and Yearly)
+- [ ] Kanban-like metrics (throughput, velocity, etc)
+- [ ] Balance of effort in projects (plan vs actual)
+- [ ] Focus view (recommendations of tasks to focus on)
