@@ -1,15 +1,15 @@
 import streamlit as st
-from src.frontend.plots import (
+from frontend.plots import (
     calendar_task_plot, completed_tasks_per_day,
     completed_tasks_per_day_per_project, create_metrics_cards,
     day_of_week_ridgeline_plot, each_project_total_percentage_plot,
     one_hundred_stacked_bar_plot_per_project)
-from src.frontend.filters import (date_filter, last_month_filter,
+from frontend.filters import (date_filter, last_month_filter,
                                   last_seven_days_filter,
                                   last_week_filter,
                                   last_year_filter,
                                   project_filter, weekend_filter)
-from src.backend.utils import create_color_palette
+from backend.utils import create_color_palette
 
 
 def render():

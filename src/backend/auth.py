@@ -3,7 +3,7 @@ import asyncio
 import requests
 import streamlit as st
 
-from src.backend import session_state
+from backend import session_state
 
 
 async def get_auth(client_id, client_secret):

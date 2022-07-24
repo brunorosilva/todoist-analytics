@@ -9,7 +9,7 @@ from plotly.colors import n_colors
 from plotly.missing_ipywidgets import FigureWidget
 from plotly_calplot import calplot
 
-from ..backend.utils import safe_divide
+from backend.utils import safe_divide
 
 
 def create_metrics_cards(completed_tasks: DataFrame, cols: list, remove_weekends: bool):

@@ -1,17 +1,17 @@
 import streamlit as st
 from PIL import Image
 
-from src.backend.auth import run_auth
-from src.backend.utils import create_color_palette, get_data
-from src.credentials import client_id, client_secret
-from src.frontend.filters import (date_filter, last_month_filter,
+from backend.auth import run_auth
+from backend.utils import create_color_palette, get_data
+from credentials import client_id, client_secret
+from frontend.filters import (date_filter, last_month_filter,
                                   last_seven_days_filter,
                                   last_week_filter,
                                   last_year_filter,
                                   project_filter, weekend_filter)
-from src.frontend.habit_tracker import (filter_recurrent_task,
+from frontend.habit_tracker import (filter_recurrent_task,
                                         get_recurrent_tasks)
-from src.frontend.plots import (
+from frontend.plots import (
     calendar_habits_plot, calendar_task_plot, completed_tasks_per_day,
     completed_tasks_per_day_per_project, create_metrics_cards,
     day_of_week_ridgeline_plot, each_project_total_percentage_plot,

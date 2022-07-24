@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 from pandas.core.frame import DataFrame
 
-from src.backend.data_collector import DataCollector
+from backend.data_collector import DataCollector
 
 
 def create_color_palette(completed_tasks: DataFrame):

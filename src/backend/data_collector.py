@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import todoist
 
-from src.frontend.colorscale import color_code_to_hex
+from frontend.colorscale import color_code_to_hex
 
 
 class DataCollector:

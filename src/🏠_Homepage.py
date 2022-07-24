@@ -1,15 +1,12 @@
 import streamlit as st
-from PIL import Image
-from src.backend.auth import run_auth
-from src.backend.utils import get_data
-from src.credentials import client_id, client_secret
+from backend.auth import run_auth
+from backend.utils import get_data
+from credentials import client_id, client_secret
 
 
 if __name__ == "__main__":
-
     # Set page config
-    logo = Image.open("img/analytics_logo_300x300.png")
-    st.set_page_config(page_title="Todoist Analytics", layout="wide", page_icon=logo)
+    st.set_page_config(page_title="Todoist Analytics", layout="wide")
 
     st.title("Welcome to Todoist Analytics")
     st.write("This is a simple app to track your habits.")
