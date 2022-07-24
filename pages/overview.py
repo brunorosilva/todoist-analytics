@@ -65,3 +65,10 @@ def render():
 
     for fig in figs:
         st.plotly_chart(fig, use_container_width=True)
+
+
+if __name__ == "__main__":
+    if 'data_loaded' in st.session_state:
+        render()
+    else:
+        st.write("Go back to the [homepage](/) and load your data first.")
