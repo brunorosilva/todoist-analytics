@@ -1,8 +1,8 @@
 # local files
-todoist_analytics/credentials.py
+src/credentials.py
 
 # local folders
-todoist_analytics/backend/db
+src/backend/db
 
 # more hidden folders
 .venv/

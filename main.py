@@ -1,9 +1,9 @@
 import streamlit as st
 from PIL import Image
-from todoist_analytics.backend.auth import run_auth
-from todoist_analytics.backend.utils import get_data
-from todoist_analytics.credentials import client_id, client_secret
-from todoist_analytics.frontend import habits, overview
+from src.backend.auth import run_auth
+from src.backend.utils import get_data
+from src.credentials import client_id, client_secret
+from src.frontend import habits, overview
 
 
 # Object to store all the apps
@@ -36,7 +36,7 @@ class MultiApp:
 
 if __name__ == "__main__":
     # Set page config
-    logo = Image.open("assets/images/todoist_logo.png")
+    logo = Image.open("img/analytics_logo_300x300.png")
     st.set_page_config(page_title="Todoist Analytics", layout="wide", page_icon=logo)
 
     # Create multiapp

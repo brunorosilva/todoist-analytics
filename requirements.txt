@@ -1,0 +1,8 @@
+numpy==1.23.1
+pandas==1.4.3
+Pillow==9.2.0
+plotly==5.9.0
+plotly_calplot==0.1.11
+requests==2.28.1
+streamlit==1.11.0
+todoist_python==8.1.3

@@ -1,10 +1,11 @@
-FROM python:3.7.4
+FROM python:3.8.6
+
 COPY . /app
 WORKDIR /app
 
 RUN pip install --upgrade pip
-RUN pip install dist/todoist-analytics-0.0.0.tar.gz
+RUN pip install -r requirements.txt
 
+EXPOSE 80
 
-CMD ["sh", "-c", "streamlit run --server.port $PORT streamlit_app.py"]
-# ENTRYPOINT ["streamlit", "run", "", "--server.port $PORT"]
+CMD ["streamlit", "run", "main.py", "--server.port", "80"]
