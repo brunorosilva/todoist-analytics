@@ -33,8 +33,9 @@ docker run toodoist_analytics -p 80:80
   git clone https://github.com/MarianoOG/Todoist-Analytics.git
 ```
 
-3. Create the credentials.py file with your app client_id and client_secret.
+3. Create the credentials.py file inside the src folder with your app client_id and client_secret.
 ```
+# Use this format change the values to your own
 client_id = {client_id}
 client_secret = {client_secret}
 ```
