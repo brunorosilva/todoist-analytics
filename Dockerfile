@@ -1,11 +1,12 @@
 FROM python:3.8.6
 
-COPY . /app
+COPY ./src /app
+COPY ./requirements.txt /app
 WORKDIR /app
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip --no-cache-dir && \
+    pip install -r requirements.txt --no-cache-dir
 
 EXPOSE 80
 
-CMD ["streamlit", "run", "main.py", "--server.port", "80"]
+CMD ["streamlit", "run", "Homepage.py", "--server.port", "80"]
