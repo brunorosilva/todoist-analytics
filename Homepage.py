@@ -8,7 +8,6 @@ if __name__ == "__main__":
     st.set_page_config(page_title="Todoist Analytics", layout="wide", page_icon="📊")
 
     st.title("Welcome to Todoist Analytics")
-    st.write("This is a simple app to track your habits.")
 
     token = run_auth()
     if token is not None:
@@ -20,4 +19,5 @@ if __name__ == "__main__":
 
     # Add message once the data is loaded
     if 'data_loaded' in st.session_state:
+        st.write("This is a simple app to track your habits.")
         st.info("Your data is loaded, you can start using this app now.")

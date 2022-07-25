@@ -1,7 +1,6 @@
 FROM python:3.8.6
 
-COPY ./src /app
-COPY ./requirements.txt /app
+COPY . /app
 WORKDIR /app
 
 RUN pip install --upgrade pip --no-cache-dir && \
