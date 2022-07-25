@@ -9,12 +9,51 @@ After a while I found [this project](https://github.com/brunorosilva/todoist-ana
 that finally satisfied my curiosity. However, I wanted more features, and I wanted to make it my own.
 So I decided to build starting from his ideas and code to include some additional things I always wanted to have.
 
-## Pending tasks
+## How to use this tool
 
-- [X] Simplify code and remove tools that I don't use
-- [ ] Instructions for running this tool locally
-- [ ] Instructions for running this tool using docker
-- [ ] Deploy it to a server (and create pipeline) so others can use the most recent version
+- [ ] PENDING: deploy to azure web app
+
+## How to run this tool locally
+
+### Docker
+
+Run the following commands to start the docker container:
+
+```
+docker build -t todoist_analytics .
+docker run toodoist_analytics -p 80:80
+``` 
+
+### Virtual Environment
+
+1. Create an app in your todoist account: https://developer.todoist.com/appconsole.html
+
+2. Clone the repository
+```
+  git clone https://github.com/MarianoOG/Todoist-Analytics.git
+```
+
+3. Create the credentials.py file with your app client_id and client_secret.
+```
+client_id = {client_id}
+client_secret = {client_secret}
+```
+
+4. Create a virtual environment
+```
+python -m venv venv
+```
+
+
+4. Install dependencies
+```
+pip install -r requirements.txt
+```
+
+5. Run the streamlit app
+```
+streamlit run src/Homepage.py
+```
 
 ## Ideas of new features
 
