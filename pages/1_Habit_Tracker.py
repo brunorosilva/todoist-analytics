@@ -1,6 +1,6 @@
 import streamlit as st
-from frontend.habit_tracker import filter_recurrent_task, get_recurrent_tasks
-from frontend.plots import calendar_habits_plot
+from src.filters import filter_recurrent_task, get_recurrent_tasks
+from src.plots import calendar_habits_plot
 
 
 def render():

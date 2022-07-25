@@ -1,17 +1,14 @@
 import asyncio
-
 import requests
 import streamlit as st
-
-from backend import session_state
+from src import session_state
+from src.credentials import client_id, client_secret
 
 
 async def get_auth(client_id, client_secret):
-
     authorization_url = f"https://todoist.com/oauth/authorize?" \
                         f"client_id={client_id}&" \
                         f"scope=data:read&state={client_secret}"
-    # res = requests.get(authorization_url)
     return authorization_url
 
 
@@ -26,7 +23,7 @@ async def get_token(client_id, client_secret, code):
     return token
 
 
-def run_auth(client_id, client_secret):
+def run_auth():
 
     # auth stuff
     auth_url = asyncio.run(get_auth(client_id, client_secret))
@@ -36,21 +33,17 @@ def run_auth(client_id, client_secret):
         try:
             code = st.experimental_get_query_params()["code"]
         except:
-            st.write(
-                f"""<h1>
-            Please login using this <a target="_self"
-            href="{auth_url}">url</a></h1>""",
-                unsafe_allow_html=True,
-            )
+            st.write(f"""<h2>Please login using this <a target="_self" href="{auth_url}">url</a></h2>""",
+                     unsafe_allow_html=True)
         else:
             try:
                 token = asyncio.run(get_token(client_id, client_secret, code=code))
             except:
                 st.write(
-                    f"""<h1>
+                    f"""<h2>
                     This page was refreshed.
                     Please allow again: <a target="_self"
-                    href="{auth_url}">url</a></h1>""",
+                    href="{auth_url}">url</a></h2>""",
                     unsafe_allow_html=True,
                 )
             else:
