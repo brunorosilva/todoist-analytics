@@ -24,8 +24,6 @@ async def get_token(client_id, client_secret, code):
 
 
 def run_auth():
-
-    # auth stuff
     auth_url = asyncio.run(get_auth(client_id, client_secret))
     session = session_state.get(token=None)
 
@@ -49,7 +47,5 @@ def run_auth():
             else:
                 session.token = token
                 return session.token
-
     else:
         return session.token
-    # end auth

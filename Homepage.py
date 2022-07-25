@@ -1,6 +1,6 @@
 import streamlit as st
 from src.auth import run_auth
-from src.utils import get_data
+from src.data import get_data
 
 
 if __name__ == "__main__":
