@@ -1,9 +1,7 @@
 import time
-import numpy as np
 import pandas as pd
-import streamlit as st
 import todoist
-from src.utils import color_code_to_hex
+import streamlit as st
 
 
 class DataCollector:
@@ -11,6 +9,7 @@ class DataCollector:
         self.token = token
         self.items = pd.DataFrame()
         self.projects = pd.DataFrame()
+        self.active_tasks = pd.DataFrame()
         self.api = todoist.api.TodoistAPI(self.token)
         self.api.sync()
         self.current_offset = 0
@@ -18,107 +17,61 @@ class DataCollector:
         self._collect_all_completed_tasks()
         self._collect_active_tasks()
 
+    def _collect_all_completed_tasks(self, limit=10000):
+        collecting = True
+        old_num_items = 0
+
+        while collecting:
+            self._collect_completed_tasks(limit=200, offset=self.current_offset)
+            current_num_items = self.items.shape[0]
+            if current_num_items != old_num_items and current_num_items < limit:
+                old_num_items = current_num_items
+                self.current_offset += 200
+            else:
+                self.current_offset = current_num_items
+                collecting = False
+
     def _collect_completed_tasks(self, limit, offset):
         data = self.api.completed.get_all(limit=limit, offset=offset)
+
         if data == "Service Unavailable\n":
             time.sleep(3)
             self._collect_completed_tasks(limit, offset)
         else:
             if len(data["items"]) != 0:
-                self._append_to_properties(data)
-
-    def _append_to_properties(self, data):
-        preprocessed_items, preprocessed_projects = self._preprocess_completed_tasks(
-            pd.DataFrame(data["items"]),
-            pd.DataFrame.from_dict(data["projects"], orient="index"),
-        )
-        self.items = self.items.append(preprocessed_items)
-        self.projects = self.projects.append(preprocessed_projects)
-
-    def _collect_all_completed_tasks(self, limit=10000):
-        """
-        gets all the tasks and stores it
-        this function may take too long to complete and timeout,
-        a limit is set in order to prevent this
-        """
-        stop_collecting = False
-        old_shape = 0
-
-        while not stop_collecting:
-            self._collect_completed_tasks(limit=200, offset=self.current_offset)
-            new_shape = self.items.shape[0]
-            if new_shape != old_shape and new_shape < limit:
-                old_shape = new_shape
-                self.current_offset += 200
-            else:
-                self.current_offset = new_shape
-                stop_collecting = True
+                items = pd.DataFrame(data["items"])
+                projects = pd.DataFrame.from_dict(data["projects"], orient="index")
+                self.items = pd.concat([self.items, items])
+                self.projects = pd.concat([self.projects, projects])
 
     def _collect_active_tasks(self):
-        self.active_tasks = pd.DataFrame([d.data for d in self.api.state["items"]])  # State to dataframe
-        keep_columns = [
-            "checked",
-            "content",
-            "added_by_uid",
-            "description",
-            "due",
-            "labels",
-            "priority",
-            "project_id",
-            "date_added",
-            "id",
-        ]
-        self.active_tasks = self.active_tasks[keep_columns]
+        self.active_tasks = pd.DataFrame([d.data for d in self.api.state["items"]])
         self.active_tasks = self.active_tasks.loc[self.active_tasks["checked"] == 0]
-
-    def _preprocess_completed_tasks(self, completed_tasks, projects):
-
-        projects = projects.rename({"id": "project_id"}, axis=1)
-
-        completed_tasks["datehour_completed"] = pd.to_datetime(
-            completed_tasks["completed_date"]
-        )
-
-        completed_tasks["datehour_completed"] = pd.DatetimeIndex(
-            completed_tasks["datehour_completed"]
-        ).tz_convert(self.tz)
-        completed_tasks["completed_date"] = pd.to_datetime(
-            completed_tasks["datehour_completed"]
-        ).dt.date
-        completed_tasks["completed_date_weekday"] = pd.to_datetime(
-            completed_tasks["datehour_completed"]
-        ).dt.day_name()
-        completed_tasks = completed_tasks.merge(
-            projects[["project_id", "name", "color"]],
-            how="left",
-            left_on="project_id",
-            right_on="project_id",
-        )
-        completed_tasks = completed_tasks.rename({"name": "project_name"}, axis=1)
-
-        # creating the recurrent flag column -> not good implementation
-        completed_date_count = completed_tasks.groupby("task_id").agg(
-            {"completed_date": "nunique"}
-        )
-        completed_date_count["isRecurrent"] = np.where(
-            completed_date_count["completed_date"] > 1, 1, 0
-        )
-        completed_date_count.drop(columns="completed_date", inplace=True)
-
-        completed_tasks = completed_tasks.merge(
-            completed_date_count, left_on="task_id", right_index=True
-        )
-
-        completed_tasks["hex_color"] = completed_tasks["color"].apply(
-            lambda x: color_code_to_hex[int(x)]["hex"]
-        )
-
-        completed_tasks = completed_tasks.drop_duplicates().reset_index(drop=True)
-
-        return completed_tasks, projects
 
 
 @st.cache(show_spinner=False)
 def get_data(token):
     dc = DataCollector(token)
-    return dc.items, dc.active_tasks
+    return dc.items, dc.active_tasks, dc.projects
+
+
+color_code_to_hex = {30: "#b8256f",
+                     31: "#db4035",
+                     32: "#ff9933",
+                     33: "#fad000",
+                     34: "#afb83b",
+                     35: "#7ecc49",
+                     36: "#299438",
+                     37: "#6accbc",
+                     38: "#158fad",
+                     39: "#14aaf5",
+                     40: "#96c3eb",
+                     41: "#4073ff",
+                     42: "#884dff",
+                     43: "#af38eb",
+                     44: "#eb96eb",
+                     45: "#e05194",
+                     46: "#ff8d85",
+                     47: "#808080",
+                     48: "#b8b8b8",
+                     49: "#ccac93"}

@@ -1,9 +1,9 @@
+# Credits to https://github.com/uiucanh/streamlit-google-oauth
 from streamlit.scriptrunner import get_script_run_ctx
 from streamlit.server.server import Server
 
 
 # SessionState class that has all the information
-# Credits to https://github.com/uiucanh/streamlit-google-oauth
 class SessionState(object):
     def __init__(self, **kwargs):
         for key, val in kwargs.items():
@@ -11,7 +11,6 @@ class SessionState(object):
 
 
 # Get function to get any value from session state
-# Credits to https://github.com/uiucanh/streamlit-google-oauth
 def get(**kwargs):
     ctx = get_script_run_ctx()
     this_session = None
