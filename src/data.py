@@ -16,6 +16,9 @@ class DataCollector:
         self.tz = self.api.state["user"]["tz_info"]["timezone"]
         self._collect_all_completed_tasks()
         self._collect_active_tasks()
+        self.preprocess = False
+        self._preprocess_data()
+        self.preprocess = True
 
     def _collect_all_completed_tasks(self, limit=10000):
         collecting = True
@@ -48,11 +51,37 @@ class DataCollector:
         self.active_tasks = pd.DataFrame([d.data for d in self.api.state["items"]])
         self.active_tasks = self.active_tasks.loc[self.active_tasks["checked"] == 0]
 
+    def _preprocess_data(self):
+        if self.preprocess:
+            return
+
+        # Projects
+        self.projects.drop_duplicates(inplace=True)
+        self.projects.rename(columns={"id": "project_id", "name": "project_name"}, inplace=True)
+
+        # Items
+        self.items = self.items.merge(self.projects[["project_id", "project_name", "color"]],
+                                      how="left",
+                                      on="project_id")
+        self.items.drop(["project_id", "meta_data", "user_id", "id", "task_id"], axis=1, inplace=True)
+        
+        # Active tasks
+        self.active_tasks = self.active_tasks[self.active_tasks["checked"] == 0]
+        self.active_tasks = self.active_tasks[self.active_tasks["in_history"] == 0]
+        self.active_tasks = self.active_tasks[self.active_tasks["is_deleted"] == 0]
+        self.active_tasks = self.active_tasks.merge(self.projects[["project_id", "project_name", "color"]],
+                                                    how="left",
+                                                    on="project_id")
+        dropped_columns = ["added_by_uid", "assigned_by_uid", "checked", "child_order", "collapsed", "date_completed",
+                           "day_order", "has_more_notes", "in_history", "is_deleted", "responsible_uid", "parent_id",
+                           "user_id", "sync_id", "description", "id", "project_id", "labels", "section_id"]
+        self.active_tasks.drop(dropped_columns, axis=1, inplace=True)
+
 
 @st.cache(show_spinner=False)
 def get_data(token):
     dc = DataCollector(token)
-    return dc.items, dc.active_tasks, dc.projects
+    return dc.items, dc.active_tasks
 
 
 color_code_to_hex = {30: "#b8256f",
