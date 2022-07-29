@@ -5,17 +5,17 @@ from src.data import get_data
 
 
 def render():
+    # Print welcome message
     st.title("Welcome to Todoist Analytics")
-    st.write("This is a simple app to track your habits.")
-    st.info("Your data is loaded, you can start using this app now.")
+    st.caption("This is a simple app to track your habits.")
 
-    st.header("Completed tasks")
-    st.dataframe(st.session_state["completed_tasks"])
+    st.header("Tasks")
+    tasks = st.session_state["tasks"].copy()
+    st.write(tasks)
+    st.write(tasks.dtypes.astype(str))
 
-    # Filter and enrich active tasks dataframe
-
-    st.header("Active tasks")
-    st.dataframe(st.session_state["active_tasks"])
+    st.header("user")
+    st.write(st.session_state["user"])
 
 
 if __name__ == "__main__":
@@ -24,12 +24,14 @@ if __name__ == "__main__":
 
     if 'data_loaded' not in st.session_state:
         token = run_auth()
+
         if token is not None:
             with st.spinner("Getting your data :)"):
-                completed, active = get_data(token)
-                st.session_state["completed_tasks"] = completed
-                st.session_state["active_tasks"] = active
+                tasks, user = get_data(token)
+                st.session_state["tasks"] = tasks
+                st.session_state["user"] = user
                 st.session_state["data_loaded"] = True
+                st.info("Your data is loaded, you can start using this app now.")
 
     if 'data_loaded' in st.session_state:
         render()

@@ -7,18 +7,14 @@ import streamlit as st
 class DataCollector:
     def __init__(self, token):
         self.token = token
-        self.items = pd.DataFrame()
-        self.projects = pd.DataFrame()
-        self.active_tasks = pd.DataFrame()
         self.api = todoist.api.TodoistAPI(self.token)
+        self.api.reset_state()
         self.api.sync()
+        self.user = self.api.state["user"]
+        self.tasks = pd.DataFrame()
         self.current_offset = 0
-        self.tz = self.api.state["user"]["tz_info"]["timezone"]
         self._collect_all_completed_tasks()
-        self._collect_active_tasks()
-        self.preprocess = False
         self._preprocess_data()
-        self.preprocess = True
 
     def _collect_all_completed_tasks(self, limit=10000):
         collecting = True
@@ -26,7 +22,7 @@ class DataCollector:
 
         while collecting:
             self._collect_completed_tasks(limit=200, offset=self.current_offset)
-            current_num_items = self.items.shape[0]
+            current_num_items = self.tasks.shape[0]
             if current_num_items != old_num_items and current_num_items < limit:
                 old_num_items = current_num_items
                 self.current_offset += 200
@@ -43,64 +39,68 @@ class DataCollector:
         else:
             if len(data["items"]) != 0:
                 items = pd.DataFrame(data["items"])
-                projects = pd.DataFrame.from_dict(data["projects"], orient="index")
-                self.items = pd.concat([self.items, items])
-                self.projects = pd.concat([self.projects, projects])
-
-    def _collect_active_tasks(self):
-        self.active_tasks = pd.DataFrame([d.data for d in self.api.state["items"]])
-        self.active_tasks = self.active_tasks.loc[self.active_tasks["checked"] == 0]
+                self.tasks = pd.concat([self.tasks, items])
 
     def _preprocess_data(self):
-        if self.preprocess:
-            return
+        # Color the tasks by project
+        color_code_to_hex = {30: "#b8256f", 31: "#db4035", 32: "#ff9933", 33: "#fad000", 34: "#afb83b",
+                             35: "#7ecc49", 36: "#299438", 37: "#6accbc", 38: "#158fad", 39: "#14aaf5",
+                             40: "#96c3eb", 41: "#4073ff", 42: "#884dff", 43: "#af38eb", 44: "#eb96eb",
+                             45: "#e05194", 46: "#ff8d85", 47: "#808080", 48: "#b8b8b8", 49: "#ccac93"}
 
         # Projects
-        self.projects.drop_duplicates(inplace=True)
-        self.projects.rename(columns={"id": "project_id", "name": "project_name"}, inplace=True)
+        projects = pd.DataFrame()
+        projects["project_id"] = [p["id"] for p in self.api.state["projects"]]
+        projects["project_name"] = [p["name"] for p in self.api.state["projects"]]
+        projects["color"] = [color_code_to_hex[p["color"]] for p in self.api.state["projects"]]
 
-        # Items
-        self.items = self.items.merge(self.projects[["project_id", "project_name", "color"]],
+        # Labels
+        labels = dict()
+        for p in self.api.state["labels"]:
+            labels[p["id"]] = p["name"]
+
+        # Active tasks
+        active_tasks = pd.DataFrame()
+        active_tasks["task_id"] = [p["id"] for p in self.api.state["items"]]
+        active_tasks["content"] = [p["content"] for p in self.api.state["items"]]
+        active_tasks["priority"] = [p["priority"] for p in self.api.state["items"]]
+        active_tasks["project_id"] = [p["project_id"] for p in self.api.state["items"]]
+        active_tasks["labels"] = [[labels[label] for label in p["labels"]]
+                                  for p in self.api.state["items"]]
+        active_tasks["added_date"] = [p["date_added"] for p in self.api.state["items"]]
+        active_tasks["due_date"] = [p["due"]["date"] if p["due"] else None
+                                    for p in self.api.state["items"]]
+        active_tasks["recurring"] = [p["due"]["is_recurring"] if p["due"] else None
+                                     for p in self.api.state["items"]]
+        active_tasks = active_tasks.merge(projects[["project_id", "project_name", "color"]],
+                                          how="left",
+                                          on="project_id")
+        active_tasks.drop(["project_id"], axis=1, inplace=True)
+
+        # completed_tasks
+        self.tasks["priority"] = 0
+        self.tasks = self.tasks.merge(projects[["project_id", "project_name", "color"]],
                                       how="left",
                                       on="project_id")
-        self.items.drop(["project_id", "meta_data", "user_id", "id", "task_id"], axis=1, inplace=True)
-        
-        # Active tasks
-        self.active_tasks = self.active_tasks[self.active_tasks["checked"] == 0]
-        self.active_tasks = self.active_tasks[self.active_tasks["in_history"] == 0]
-        self.active_tasks = self.active_tasks[self.active_tasks["is_deleted"] == 0]
-        self.active_tasks = self.active_tasks.merge(self.projects[["project_id", "project_name", "color"]],
-                                                    how="left",
-                                                    on="project_id")
-        dropped_columns = ["added_by_uid", "assigned_by_uid", "checked", "child_order", "collapsed", "date_completed",
-                           "day_order", "has_more_notes", "in_history", "is_deleted", "responsible_uid", "parent_id",
-                           "user_id", "sync_id", "description", "id", "project_id", "labels", "section_id"]
-        self.active_tasks.drop(dropped_columns, axis=1, inplace=True)
+        self.tasks = self.tasks.merge(active_tasks[["task_id", "recurring"]],
+                                      how="left",
+                                      on="task_id")
+
+        # Combine all tasks in one dataframe
+        self.tasks = pd.concat([active_tasks, self.tasks], axis=0, ignore_index=True)
+        self.tasks.drop(["meta_data", "user_id", "id", "task_id", "project_id"], axis=1, inplace=True)
+
+        # Format dates using timezone
+        timezone = self.user["tz_info"]["timezone"]
+        self.tasks["completed_date"] = pd.to_datetime(self.tasks["completed_date"]).map(
+            lambda x: x.tz_convert(timezone))
+        self.tasks["added_date"] = pd.to_datetime(self.tasks["added_date"]).map(
+            lambda x: x.tz_convert(timezone))
+        self.tasks["due_date"] = pd.to_datetime(self.tasks["due_date"], utc=True).map(
+            lambda x: x.tz_convert(timezone))
 
 
 @st.cache(show_spinner=False)
 def get_data(token):
     dc = DataCollector(token)
-    return dc.items, dc.active_tasks
-
-
-color_code_to_hex = {30: "#b8256f",
-                     31: "#db4035",
-                     32: "#ff9933",
-                     33: "#fad000",
-                     34: "#afb83b",
-                     35: "#7ecc49",
-                     36: "#299438",
-                     37: "#6accbc",
-                     38: "#158fad",
-                     39: "#14aaf5",
-                     40: "#96c3eb",
-                     41: "#4073ff",
-                     42: "#884dff",
-                     43: "#af38eb",
-                     44: "#eb96eb",
-                     45: "#e05194",
-                     46: "#ff8d85",
-                     47: "#808080",
-                     48: "#b8b8b8",
-                     49: "#ccac93"}
+    return dc.tasks, dc.user

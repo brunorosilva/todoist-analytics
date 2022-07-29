@@ -34,8 +34,6 @@ def run_auth():
     params = st.experimental_get_query_params()
     code = params.get("code")
 
-    # If no code is found send the user to login using
-    # TODO: always return something
     if not code:
         st.write(f"""<h2>Please login using this <a target="_self" href="{auth_url}">url</a></h2>""",
                  unsafe_allow_html=True)
