@@ -1,7 +1,6 @@
 import time
 import pandas as pd
 import todoist
-import streamlit as st
 
 
 class DataCollector:
@@ -34,7 +33,7 @@ class DataCollector:
         data = self.api.completed.get_all(limit=limit, offset=offset)
 
         if data == "Service Unavailable\n":
-            time.sleep(3)
+            time.sleep(1)
             self._collect_completed_tasks(limit, offset)
         else:
             if len(data["items"]) != 0:
@@ -99,8 +98,3 @@ class DataCollector:
         self.tasks["due_date"] = pd.to_datetime(self.tasks["due_date"], utc=True).map(
             lambda x: x.tz_convert(timezone))
 
-
-@st.cache(show_spinner=False)
-def get_data(token):
-    dc = DataCollector(token)
-    return dc.tasks, dc.user

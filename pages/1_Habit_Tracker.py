@@ -1,12 +1,15 @@
 import streamlit as st
+from src.utils import is_data_ready
 
 
 def render():
     st.title("Habit Tracking")
+    st.header("Under construction")
 
 
 if __name__ == "__main__":
-    if 'data_loaded' in st.session_state:
+    # Set page config
+    st.set_page_config(page_title="Todoist Analytics", layout="wide", page_icon="📊")
+
+    if is_data_ready():
         render()
-    else:
-        st.write("Go back to the [homepage](/) and load your data first.")

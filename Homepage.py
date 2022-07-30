@@ -1,13 +1,12 @@
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
-from src.auth import run_auth
-from src.data import get_data
+from src.utils import is_data_ready
 
 
 def render():
     # Print welcome message
-    st.title("Welcome to Todoist Analytics")
+    st.title("Homepage")
     st.caption("This is a simple app to track your habits.")
 
     # Copy data from Todoist
@@ -57,16 +56,5 @@ if __name__ == "__main__":
     # Set page config
     st.set_page_config(page_title="Todoist Analytics", layout="wide", page_icon="📊")
 
-    if 'data_loaded' not in st.session_state:
-        token = run_auth()
-
-        if token is not None:
-            with st.spinner("Getting your data :)"):
-                tasks, user = get_data(token)
-                st.session_state["tasks"] = tasks
-                st.session_state["user"] = user
-                st.session_state["data_loaded"] = True
-                st.info("Your data is loaded, you can start using this app now.")
-
-    if 'data_loaded' in st.session_state:
+    if is_data_ready():
         render()
