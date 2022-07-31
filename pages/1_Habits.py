@@ -21,13 +21,21 @@ def render():
     axes.get_yaxis().set_ticks([])
     st.pyplot(axes.figure)
 
-    tab1, tab2, tab3 = st.tabs(["Weekly", "Monthly", "Yearly"])
+    # Get and print the counts per project
+    col_year, col_month, col_week, col_day = st.columns(4)
+    year = col_year.selectbox("Year", years)
+    month = col_month.selectbox("Month", range(1, 13))
+
+    # Different tabs for different grouping options
+    tab1, tab2, tab3, tab4 = st.tabs(["Daily", "Weekly", "Monthly", "Yearly"])
 
     with tab1:
         st.write(habits)
 
     with tab2:
-        year = st.selectbox("Year", years)
+        st.header("Weekly habits")
+
+    with tab3:
         filtered_habits = habits[habits["completed_date"].dt.year == year]
         filtered_counts = filtered_habits["task_id"].groupby(by=filtered_habits['completed_date'].dt.date).count()
         axes = july.calendar_plot(filtered_counts.index, filtered_counts.values, value_label=True, cmap="github")
@@ -37,24 +45,20 @@ def render():
             print(axes[0])
             st.pyplot(axes[0].figure)
 
-
-    with tab3:
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            for year in years:
-                filtered_habits = habits[habits["completed_date"].dt.year == year]
-                filtered_counts = filtered_habits["task_id"].groupby(
-                    by=filtered_habits['completed_date'].dt.date).count()
-                axes = july.heatmap(filtered_counts.index, filtered_counts.values, cmap="github", colorbar=True)
-                axes.get_yaxis().set_ticks([])
-                st.pyplot(axes.figure)
+    with tab4:
+        for year in years:
+            filtered_habits = habits[habits["completed_date"].dt.year == year]
+            filtered_counts = filtered_habits["task_id"].groupby(
+                by=filtered_habits['completed_date'].dt.date).count()
+            axes = july.heatmap(filtered_counts.index, filtered_counts.values, cmap="github", colorbar=True)
+            axes.get_yaxis().set_ticks([])
+            st.pyplot(axes.figure)
                 # axes = july.calendar_plot(dates, data, value_label=True, cmap="github")
                 # fig = axes[0][0].figure
                 # st.pyplot(fig)
             # fig, ax = plt.subplots()
             # july.heatmap(dates, data, month=7, year=2022, value_label=True, cmap="github", ax=ax)
             # st.pyplot(fig)
-
 
 
 if __name__ == "__main__":
