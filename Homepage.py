@@ -20,8 +20,19 @@ def render():
     col3.metric(label="Active Tasks", value=active_tasks.shape[0])
     col4.metric(label="Projects", value=tasks["project_name"].nunique()-1)
 
+    # Completed tasks timeline
     st.header("Completed tasks per day")
-    st.line_chart(tasks.groupby([tasks["completed_date"].dt.date]).content.count())
+    completed_tasks_per_day = tasks.set_index("completed_date")["task_id"].resample("D").count().rename("count")
+    ema7 = completed_tasks_per_day.ewm(span=7, adjust=False).mean()
+
+    fig, ax = plt.subplots(figsize=(15, 3), dpi=100)
+    ax.plot(completed_tasks_per_day.index, completed_tasks_per_day.values, 'y')
+    ax.plot(ema7.index, ema7.values, 'b')
+    ax.axhline(completed_tasks_per_day.values.mean(), color='r', linestyle='--')
+    ax.set_ylabel("# Tasks")
+    ax.set_xlabel("Date")
+    ax.legend(["Total per day", "EMA", "Average ({})".format(round(completed_tasks_per_day.values.mean(), 1))])
+    st.pyplot(fig)
 
     col1, col2 = st.columns(2)
 
