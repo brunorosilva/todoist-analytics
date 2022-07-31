@@ -87,7 +87,7 @@ class DataCollector:
 
         # Combine all tasks in one dataframe
         self.tasks = pd.concat([active_tasks, self.tasks], axis=0, ignore_index=True)
-        self.tasks.drop(["meta_data", "user_id", "id", "task_id", "project_id"], axis=1, inplace=True)
+        self.tasks.drop(["meta_data", "user_id", "id", "project_id"], axis=1, inplace=True)
 
         # Format dates using timezone
         timezone = self.user["tz_info"]["timezone"]
@@ -97,4 +97,3 @@ class DataCollector:
             lambda x: x.tz_convert(timezone))
         self.tasks["due_date"] = pd.to_datetime(self.tasks["due_date"], utc=True).map(
             lambda x: x.tz_convert(timezone))
-
