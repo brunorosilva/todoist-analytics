@@ -1,56 +1,53 @@
+import pandas as pd
 import streamlit as st
-import matplotlib.pyplot as plt
 from src.utils import is_data_ready
+from src.plots import category_pie, plot_with_average
 
 
 def render():
-    # Print welcome message
+    # Get data
     st.title("Homepage")
-
-    # Copy data from Todoist
     tasks = st.session_state["tasks"].copy()
+    completed_tasks = tasks.dropna(subset=["completed_date"])
+    active_tasks = tasks[tasks["priority"] != "Priority 0"]
+    due_tasks = active_tasks.dropna(subset=["due_date"])
 
-    active_tasks = tasks[tasks["priority"] != 0]
-    completed_tasks = tasks[tasks["priority"] == 0]
-
-    # Dashboard top section
-    col1, col2, col3, col4 = st.columns(4)
+    # Metrics top section
+    col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric(label="Total Tasks", value=tasks.shape[0])
     col2.metric(label="Completed Tasks", value=completed_tasks.shape[0])
     col3.metric(label="Active Tasks", value=active_tasks.shape[0])
-    col4.metric(label="Projects", value=tasks["project_name"].nunique()-1)
+    col4.metric(label="Tasks with due date", value=due_tasks.shape[0])
+    col5.metric(label="Projects", value=tasks["project_name"].nunique()-1)
 
     # Completed tasks timeline
     st.header("Completed tasks per day")
-    completed_tasks_per_day = tasks.set_index("completed_date")["task_id"].resample("D").count().rename("count")
-
-    fig, ax = plt.subplots(figsize=(15, 3), dpi=100)
-    ax.plot(completed_tasks_per_day.index, completed_tasks_per_day.values, 'mediumseagreen')
-    ax.axhline(completed_tasks_per_day.values.mean(), color='r', linestyle='--')
-    ax.set_ylabel("# Tasks")
-    ax.set_xlabel("Date")
-    ax.legend(["Total per day", "Average ({})".format(round(completed_tasks_per_day.values.mean(), 1))])
+    completed_tasks_per_day = completed_tasks["task_id"].groupby(by=completed_tasks["completed_date"].dt.date)\
+                                                        .count().rename("count")
+    fig, ax = plot_with_average(completed_tasks_per_day, x_label="Date", y_label="# Tasks")
     st.pyplot(fig)
 
+    # Middle section columns
     col1, col2 = st.columns(2)
 
+    # Active tasks per project
     with col1:
-        st.header("Completed tasks per project")
-        completed_tasks_project_counts = completed_tasks["project_name"].value_counts()
-        fig, ax = plt.subplots()
-        ax.pie(completed_tasks_project_counts.values,
-               labels=completed_tasks_project_counts.index,
-               explode=[0.1] * len(completed_tasks_project_counts))
+        st.header("Active tasks per project")
+        fig, _ = category_pie(active_tasks, "project_name")
         st.pyplot(fig)
 
+    # Active tasks per day
     with col2:
-        st.header("Active tasks per project")
-        active_tasks_project_counts = active_tasks["project_name"].value_counts()
-        fig, ax = plt.subplots()
-        ax.pie(active_tasks_project_counts.values,
-               labels=active_tasks_project_counts.index,
-               explode=[0.1] * len(active_tasks_project_counts))
-        col2.pyplot(fig)
+        st.header("Active tasks per priority")
+        fig, _ = category_pie(active_tasks, "priority")
+        st.pyplot(fig)
+
+    # Due tasks timeline
+    st.header("Due tasks per day")
+    due_tasks_per_day = due_tasks["task_id"].groupby(by=due_tasks["due_date"].dt.date)\
+                                            .count().rename("count")
+    fig, ax = plot_with_average(due_tasks_per_day, x_label="Date", y_label="# Tasks")
+    st.pyplot(fig)
 
 
 if __name__ == "__main__":

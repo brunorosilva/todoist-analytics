@@ -88,6 +88,8 @@ class DataCollector:
         # Combine all tasks in one dataframe
         self.tasks = pd.concat([active_tasks, self.tasks], axis=0, ignore_index=True)
         self.tasks.drop(["meta_data", "user_id", "id", "project_id"], axis=1, inplace=True)
+        self.tasks["project_name"] = self.tasks["project_name"].fillna("<No project data>")
+        self.tasks["priority"] = self.tasks["priority"].apply(lambda x: "Priority {}".format(x))
 
         # Format dates using timezone
         timezone = self.user["tz_info"]["timezone"]
