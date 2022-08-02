@@ -97,3 +97,9 @@ class DataCollector:
             lambda x: x.tz_convert(timezone))
         self.tasks["due_date"] = pd.to_datetime(self.tasks["due_date"], utc=True).map(
             lambda x: x.tz_convert(timezone))
+
+        # Format other columns
+        self.tasks["priority"] = self.tasks["priority"].astype("category")
+        self.tasks["recurring"] = self.tasks["recurring"].astype("bool")
+        self.tasks["project_name"] = self.tasks["project_name"].astype("category")
+        self.tasks["color"] = self.tasks["color"].astype("category")
