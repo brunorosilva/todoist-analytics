@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import date
+import calendar
 from src.utils import is_data_ready
 from src.plots import category_pie, plot_with_average, heatmap_plot, calendar_plot, month_plot
 
@@ -89,6 +90,25 @@ def render():
     counts_of_quarter_per_month = counts_of_year_per_month[tasks_of_quarter['completed_date'].dt.month]
     counts_of_year_per_month.set_axis([month_names[i - 1] for i in counts_of_year_per_month.index], inplace=True)
     counts_of_quarter_per_month.set_axis([month_names[i - 1] for i in counts_of_quarter_per_month.index], inplace=True)
+
+    if view_type == "Goals":
+        days_in_year = 366 if calendar.isleap(year) else 365
+        months_in_quarter = [quarter * 3 - 2, quarter * 3 - 1, quarter * 3]
+        days_in_quarter = sum([calendar.monthrange(year, m)[1] for m in months_in_quarter])
+        days_in_month = calendar.monthrange(year, month)[1]
+
+        # Get the goals per day and week
+        daily_goal = st.session_state["user"].get("daily_goal", 0)
+        weekly_goal = st.session_state["user"].get("weekly_goal", 0)
+        monthly_goal = int(days_in_month / 7) * weekly_goal + (days_in_month % 7) * daily_goal
+        quarterly_goal = int(days_in_quarter / 7) * weekly_goal + (days_in_quarter % 7) * daily_goal
+        yearly_goal = int(days_in_year / 7) * weekly_goal + (days_in_year % 7) * daily_goal
+
+        st.sidebar.metric("Daily goal", daily_goal)
+        st.sidebar.metric("Weekly goal", weekly_goal)
+        st.sidebar.metric("Monthly goal", monthly_goal)
+        st.sidebar.metric("Quarterly goal", quarterly_goal)
+        st.sidebar.metric("Yearly goal", yearly_goal)
 
     # Year tab: heatmap, category pie and plot with average
     with year_tab:

@@ -1,6 +1,6 @@
 import streamlit as st
 from src.utils import is_data_ready
-from src.plots import category_pie, plot_with_average
+from src.plots import category_pie, category_plot, plot_with_average
 
 
 def render():
@@ -20,7 +20,7 @@ def render():
     col5.metric(label="Projects", value=tasks["project_name"].nunique()-1)
 
     # Completed tasks timeline
-    st.header("Completed tasks per day")
+    st.header("Completed tasks by day")
     completed_tasks_per_day = completed_tasks["task_id"].groupby(by=completed_tasks["completed_date"].dt.date)\
                                                         .count().rename("count")
     fig, _ = plot_with_average(completed_tasks_per_day, x_label="Date", y_label="# Tasks")
@@ -31,18 +31,18 @@ def render():
 
     # Active tasks per project
     with col1:
-        st.header("Active tasks per project")
+        st.header("Active tasks by project")
         fig, _ = category_pie(active_tasks, "project_name")
         st.pyplot(fig)
 
     # Active tasks per day
     with col2:
-        st.header("Active tasks per priority")
-        fig, _ = category_pie(active_tasks, "priority")
+        st.header("Active tasks by priority")
+        fig, _ = category_plot(active_tasks, "priority")
         st.pyplot(fig)
 
     # Due tasks timeline
-    st.header("Due tasks per day")
+    st.header("Due tasks by day")
     due_tasks_per_day = due_tasks["task_id"].groupby(by=due_tasks["due_date"].dt.date)\
                                             .count().rename("count")
     fig, _ = plot_with_average(due_tasks_per_day, x_label="Date", y_label="# Tasks")
