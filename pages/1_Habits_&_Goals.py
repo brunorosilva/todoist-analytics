@@ -5,6 +5,17 @@ from src.utils import is_data_ready
 from src.plots import category_pie, plot_with_average, heatmap_plot, calendar_plot, month_plot
 
 
+def habits_and_goals_metrics(goal, actual, habits):
+    col1, col2, col3 = st.columns(3)
+    completed_delta_text = "more than goal" if actual > goal else "less than goal"
+    col1.metric("Completed tasks", actual, delta="{} {}".format(actual - goal, completed_delta_text))
+    goal_percent = (actual / goal - 1) if goal > 0 else 0
+    goal_delta_text = "above goal" if goal_percent > 0 else "below goal"
+    col2.metric("Goal", goal, delta="{:.0%} {}".format(goal_percent, goal_delta_text))
+    col3.metric("Habits", habits, delta_color="off",
+                delta="{:.0%} of completed tasks".format(habits / actual if actual > 0 else 0))
+
+
 def category_pie_and_plot_with_average(tasks, counts, label, header):
     col1, col2 = st.columns(2)
 
@@ -21,22 +32,20 @@ def category_pie_and_plot_with_average(tasks, counts, label, header):
 
 def render():
     # Title and view type
-    st.title("Details")
-    with st.sidebar:
-        view_type = st.radio("Select type:", ["All", "Habits", "Goals"])
-        st.caption("Habits are recurring tasks completed at least twice.")
+    st.title("Habits & Goals")
 
     # Layout of app
     year_col, month_col, day_col = st.columns(3)
     year_tab, quarter_tab, month_tab, week_tab, day_tab = st.tabs(["Year", "Quarter", "Month", "Week", "Day"])
 
+    # Sidebar notes
+    st.sidebar.caption("Habits are recurring tasks completed at least twice.")
+    st.sidebar.caption("Change your day and week goals in the [productivity settings]("
+                       "https://todoist.com/app/settings/productivity) inside of todoist.")
+
     # Get all tasks
     tasks = st.session_state["tasks"].copy()
     tasks = tasks[["task_id", "content", "project_name", "completed_date"]].dropna(subset=["completed_date"])
-
-    # Filter for habits only if habits filter is checked
-    if view_type == "Habits":
-        tasks = tasks[tasks.duplicated(subset=["task_id"], keep=False)]
 
     # Year help array
     years = tasks["completed_date"].dt.year.unique().tolist()
@@ -78,6 +87,14 @@ def render():
     tasks_of_week = tasks_of_year[tasks_of_year["completed_date"].dt.isocalendar().week == week]
     tasks_of_day = tasks_of_week[tasks_of_week["completed_date"].dt.day == day]
 
+    # Filter for habits
+    habits = tasks[tasks.duplicated(subset=["task_id"], keep=False)]
+    habits_of_year = habits[habits["completed_date"].dt.year == year]
+    habits_of_quarter = habits_of_year[habits_of_year["completed_date"].dt.quarter == quarter]
+    habits_of_month = habits_of_quarter[habits_of_quarter["completed_date"].dt.month == month]
+    habits_of_week = habits_of_year[habits_of_year["completed_date"].dt.isocalendar().week == week]
+    habits_of_day = habits_of_week[habits_of_week["completed_date"].dt.day == day]
+
     # Get the number of aggregated tasks per day
     counts_of_year_per_day = tasks_of_year["task_id"].groupby(by=tasks_of_year['completed_date'].dt.date).count()
     counts_of_quarter_per_day = counts_of_year_per_day[tasks_of_quarter['completed_date'].dt.date]
@@ -91,27 +108,22 @@ def render():
     counts_of_year_per_month.set_axis([month_names[i - 1] for i in counts_of_year_per_month.index], inplace=True)
     counts_of_quarter_per_month.set_axis([month_names[i - 1] for i in counts_of_quarter_per_month.index], inplace=True)
 
-    if view_type == "Goals":
-        days_in_year = 366 if calendar.isleap(year) else 365
-        months_in_quarter = [quarter * 3 - 2, quarter * 3 - 1, quarter * 3]
-        days_in_quarter = sum([calendar.monthrange(year, m)[1] for m in months_in_quarter])
-        days_in_month = calendar.monthrange(year, month)[1]
+    # Get the number of days per time unit
+    days_in_year = 366 if calendar.isleap(year) else 365
+    months_in_quarter = [quarter * 3 - 2, quarter * 3 - 1, quarter * 3]
+    days_in_quarter = sum([calendar.monthrange(year, m)[1] for m in months_in_quarter])
+    days_in_month = calendar.monthrange(year, month)[1]
 
-        # Get the goals per day and week
-        daily_goal = st.session_state["user"].get("daily_goal", 0)
-        weekly_goal = st.session_state["user"].get("weekly_goal", 0)
-        monthly_goal = int(days_in_month / 7) * weekly_goal + (days_in_month % 7) * daily_goal
-        quarterly_goal = int(days_in_quarter / 7) * weekly_goal + (days_in_quarter % 7) * daily_goal
-        yearly_goal = int(days_in_year / 7) * weekly_goal + (days_in_year % 7) * daily_goal
-
-        st.sidebar.metric("Daily goal", daily_goal)
-        st.sidebar.metric("Weekly goal", weekly_goal)
-        st.sidebar.metric("Monthly goal", monthly_goal)
-        st.sidebar.metric("Quarterly goal", quarterly_goal)
-        st.sidebar.metric("Yearly goal", yearly_goal)
+    # Get the goals for each time unit
+    daily_goal = st.session_state["user"].get("daily_goal", 0)
+    weekly_goal = st.session_state["user"].get("weekly_goal", 0)
+    monthly_goal = int(days_in_month / 7) * weekly_goal + (days_in_month % 7) * daily_goal
+    quarterly_goal = int(days_in_quarter / 7) * weekly_goal + (days_in_quarter % 7) * daily_goal
+    yearly_goal = int(days_in_year / 7) * weekly_goal + (days_in_year % 7) * daily_goal
 
     # Year tab: heatmap, category pie and plot with average
     with year_tab:
+        habits_and_goals_metrics(yearly_goal, tasks_of_year.shape[0], habits_of_year.shape[0])
         st.header("Tasks of the year heatmap")
         fig, _ = heatmap_plot(counts_of_year_per_day)
         st.pyplot(fig)
@@ -119,6 +131,7 @@ def render():
 
     # Quarter tab: calendar, category pie and plot with average
     with quarter_tab:
+        habits_and_goals_metrics(quarterly_goal, tasks_of_quarter.shape[0], habits_of_quarter.shape[0])
         st.header("Calendar heatmap view")
         fig, _ = calendar_plot(counts_of_quarter_per_day)
         st.pyplot(fig)
@@ -126,18 +139,21 @@ def render():
 
     # Month tab: calendar, category pie and plot with average
     with month_tab:
+        habits_and_goals_metrics(monthly_goal, tasks_of_month.shape[0], habits_of_month.shape[0])
         st.header("Calendar heatmap view")
         fig, _ = month_plot(counts_of_month_per_day, month)
         _, col, _ = st.columns(3)
         col.pyplot(fig)
         category_pie_and_plot_with_average(tasks_of_month, counts_of_month_per_day, "Day", "Tasks by day")
 
-    # Week tab: ?????, category pie and plot with average
+    # Week tab: category pie and plot with average
     with week_tab:
+        habits_and_goals_metrics(weekly_goal, tasks_of_week.shape[0], habits_of_week.shape[0])
         category_pie_and_plot_with_average(tasks_of_week, counts_of_week_per_day, "Day", "Tasks by day")
 
     # Day tab
     with day_tab:
+        habits_and_goals_metrics(daily_goal, tasks_of_day.shape[0], habits_of_day.shape[0])
         category_pie_and_plot_with_average(tasks_of_day, counts_of_day_per_hour, "Hour", "Tasks by hour")
         st.header("List of tasks")
         for project in tasks_of_day["project_name"].unique().tolist():

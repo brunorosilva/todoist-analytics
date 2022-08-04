@@ -2,25 +2,21 @@ import matplotlib.pyplot as plt
 import july
 
 
-def month_plot(counts, month, cmap="github"):
-    ax = july.month_plot(counts.index,
-                         counts.values,
-                         month=month,
-                         cmap=cmap,
-                         value_label=True)
+def month_plot(counts, month):
+    ax = july.month_plot(counts.index, counts.values, month=month, value_label=True)
     return ax.figure, ax
 
 
-def calendar_plot(counts, cmap="github"):
-    ax = july.calendar_plot(counts.index, counts.values, title=False, cmap=cmap, value_label=True)
+def calendar_plot(counts):
+    ax = july.calendar_plot(counts.index, counts.values, title=False, value_label=True)
     if type(ax[0]) is list:
         return ax[0][0].figure, ax
     else:
         return ax[0].figure, ax
 
 
-def heatmap_plot(counts, cmap="github"):
-    ax = july.heatmap(counts.index, counts.values, month_grid=True, cmap=cmap, colorbar=True)
+def heatmap_plot(counts):
+    ax = july.heatmap(counts.index, counts.values, month_grid=True, colorbar=True)
     return ax.figure, ax
 
 
