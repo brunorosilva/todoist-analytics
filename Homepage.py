@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 from src.utils import is_data_ready
 from src.plots import category_pie, plot_with_average
@@ -24,7 +23,7 @@ def render():
     st.header("Completed tasks per day")
     completed_tasks_per_day = completed_tasks["task_id"].groupby(by=completed_tasks["completed_date"].dt.date)\
                                                         .count().rename("count")
-    fig, ax = plot_with_average(completed_tasks_per_day, x_label="Date", y_label="# Tasks")
+    fig, _ = plot_with_average(completed_tasks_per_day, x_label="Date", y_label="# Tasks")
     st.pyplot(fig)
 
     # Middle section columns
@@ -46,7 +45,7 @@ def render():
     st.header("Due tasks per day")
     due_tasks_per_day = due_tasks["task_id"].groupby(by=due_tasks["due_date"].dt.date)\
                                             .count().rename("count")
-    fig, ax = plot_with_average(due_tasks_per_day, x_label="Date", y_label="# Tasks")
+    fig, _ = plot_with_average(due_tasks_per_day, x_label="Date", y_label="# Tasks")
     st.pyplot(fig)
 
 

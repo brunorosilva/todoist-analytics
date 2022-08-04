@@ -58,7 +58,7 @@ streamlit run Homepage.py
 
 ## Ideas of new features
 
-- [ ] New habit reports (Weekly, Monthly and Yearly)
+- [x] New habit reports (Weekly, Monthly and Yearly)
 - [ ] Kanban-like metrics (throughput, velocity, etc)
 - [ ] Balance of effort in projects (plan vs actual)
 - [ ] Focus view (recommendations of tasks to focus on)
