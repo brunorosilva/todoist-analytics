@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import date
+from datetime import date, timedelta
 import calendar
 from src.utils import is_data_ready
 from src.plots import category_pie, plot_with_average, heatmap_plot, calendar_plot, month_plot
@@ -83,8 +83,10 @@ def render():
         st.caption("This filter affects the week tab and day tab.")
 
     # Get the week that belongs to the selected day, filter for the selected week and filter for the selected day
-    week = date(year, month, day).isocalendar()[1]
-    tasks_of_week = tasks_of_year[tasks_of_year["completed_date"].dt.isocalendar().week == week]
+    start_day = 8 - st.session_state["user"]["start_day"]
+    week = (date(year, month, day) + timedelta(days=start_day)) .isocalendar()[1]
+    tasks_of_week = tasks_of_year[(tasks_of_year["completed_date"] +
+                                   timedelta(days=start_day)).dt.isocalendar().week == week]
     tasks_of_day = tasks_of_week[tasks_of_week["completed_date"].dt.day == day]
 
     # Filter for habits
@@ -92,7 +94,8 @@ def render():
     habits_of_year = habits[habits["completed_date"].dt.year == year]
     habits_of_quarter = habits_of_year[habits_of_year["completed_date"].dt.quarter == quarter]
     habits_of_month = habits_of_quarter[habits_of_quarter["completed_date"].dt.month == month]
-    habits_of_week = habits_of_year[habits_of_year["completed_date"].dt.isocalendar().week == week]
+    habits_of_week = habits_of_year[(habits_of_year["completed_date"] +
+                                     timedelta(days=start_day)).dt.isocalendar().week == week]
     habits_of_day = habits_of_week[habits_of_week["completed_date"].dt.day == day]
 
     # Get the number of aggregated tasks per day

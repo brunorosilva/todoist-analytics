@@ -5,7 +5,7 @@ from src.plots import category_pie, category_plot, plot_with_average
 
 def render():
     # Get data
-    st.title("Homepage")
+    st.title("Homepage" + " - Welcome " + st.session_state["user"]["full_name"])
     tasks = st.session_state["tasks"].copy()
     completed_tasks = tasks.dropna(subset=["completed_date"])
     active_tasks = tasks[tasks["priority"] != "Priority 0"]
