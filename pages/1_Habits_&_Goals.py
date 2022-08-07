@@ -31,7 +31,7 @@ def category_pie_and_plot_with_average(tasks, counts, label, header):
 
 
 def render():
-    # Title and view type
+    # Title
     st.title("Habits & Goals")
 
     # Layout of app

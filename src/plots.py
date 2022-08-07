@@ -2,6 +2,16 @@ import matplotlib.pyplot as plt
 import july
 
 
+def histogram(data):
+    fig, ax = plt.subplots(figsize=(15, 3), dpi=100)
+    ax.hist(data, bins=20)
+    ax.vlines(data.mean(), 0, ax.get_ylim()[1], color='r', linestyle='--')
+    ax.set_xlabel(data.name)
+    ax.set_ylabel("# Tasks")
+    ax.legend(["Average ({})".format(round(data.mean(), 1)), "Total"])
+    return fig, ax
+
+
 def month_plot(counts, month):
     ax = july.month_plot(counts.index, counts.values, month=month, value_label=True)
     return ax.figure, ax
@@ -40,13 +50,24 @@ def category_plot(data, category):
     return fig, ax
 
 
-def plot_with_average(data, x_label="", y_label="", figsize=(15, 3), labelrotation=0):
+def plot_with_average(data, x_label="", y_label="", figsize=(15, 3), labelrotation=0, ema=0):
     fig, ax = plt.subplots(figsize=figsize, dpi=100)
     ax.plot(data.index, data.values, 'mediumseagreen')
-    ax.axhline(data.values.mean(), color='r', linestyle='--')
+    ewm = 0
+    mean = data.values.mean()
+    if ema > 0:
+        ewm = data.ewm(span=ema).mean()
+        ax.plot(data.index, ewm, 'b')
+    ax.axhline(mean, color='r', linestyle='--')
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.tick_params(axis='x', labelrotation=labelrotation)
     ax.set_ylim([0, ax.get_ylim()[1]])
-    ax.legend(["Total", "Average ({})".format(round(data.values.mean(), 1))])
+    if ema > 0:
+        ax.legend(["Total",
+                   "EMA-{} ({})".format(ema, round(ewm[-1], 1)),
+                   "Average ({})".format(round(mean, 1))])
+        return fig, ax, ewm[-1]
+
+    ax.legend(["Total", "Average ({})".format(round(mean, 1))])
     return fig, ax

@@ -1,28 +1,26 @@
 # Todoist Analytics
 
-The main goal for this tool is to help you visualize, analyze and get insights about your todoist tasks. 
+The main goal for this tool is to help you visualize, analyze and get insights about your todoist tasks data. 
+
+You can interact with the demo here: 
+* https://todoist-analytics.azurewebsites.net/
+
+You can also find a docker image here:
+* https://hub.docker.com/repository/docker/marianoog/todoist_analytics
 
 ![Analytics logo](img/analytics_logo_300x300.png)
 
-I always wanted to have something like this in todoist or with an integration, but I couldn't find any good solutions. 
-After a while I found [this project](https://github.com/brunorosilva/todoist-analytics) from Bruno Chicelli,
-that finally satisfied my curiosity. However, I wanted more features, and I wanted to make it my own.
-So I decided to build starting from his ideas and code to include some additional things I always wanted to have.
+I always wanted to have something like this in todoist or with an integration, I was thinking on doing something my own,
+but I didn't want to deal with some parts of the app like session states and data retrieval. 
+After some time of searching I found [this project](https://github.com/brunorosilva/todoist-analytics) from Bruno 
+Chicelli. I was happy to see somebody already solved most of the problems I was avoiding. And thanks to that I was able 
+to start from there and not from zero. 
 
-## How to use this tool
-
-- [ ] PENDING: deploy to azure web app
+Now the dashboards have more functionality. I guess this app could be used for other people and as a starting point for
+other projects that want to create something similar. Feel free to fork and improve it or send an issue if you have any
+suggestions.
 
 ## How to run this tool locally
-
-### Docker
-
-Run the following commands to start the docker container:
-
-```
-docker build -t todoist_analytics .
-docker run toodoist_analytics -p 80:80
-``` 
 
 ### Virtual Environment
 
@@ -59,6 +57,5 @@ streamlit run Homepage.py
 ## Ideas of new features
 
 - [x] New habit reports (Weekly, Monthly and Yearly)
-- [ ] Kanban-like metrics (throughput, velocity, etc)
-- [ ] Balance of effort in projects (plan vs actual)
-- [ ] Focus view (recommendations of tasks to focus on)
+- [X] Kanban-like metrics (throughput, velocity, etc)
+- [ ] Focus view (recommendations of tasks to focus on, with balance of effort)
