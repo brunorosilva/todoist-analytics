@@ -53,9 +53,3 @@ pip install -r requirements.txt
 ```
 streamlit run Homepage.py
 ```
-
-## Ideas of new features
-
-- [x] New habit reports (Weekly, Monthly and Yearly)
-- [X] Kanban-like metrics (throughput, velocity, etc)
-- [ ] Focus view (recommendations of tasks to focus on, with balance of effort)

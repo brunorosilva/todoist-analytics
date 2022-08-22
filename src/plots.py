@@ -65,9 +65,9 @@ def plot_with_average(data, x_label="", y_label="", figsize=(15, 3), labelrotati
     ax.set_ylim([0, ax.get_ylim()[1]])
     if ema > 0:
         ax.legend(["Total",
-                   "EMA-{} ({})".format(ema, round(ewm[-1], 1)),
+                   "EMA-{} ({})".format(ema, round(ewm[-2], 1)),
                    "Average ({})".format(round(mean, 1))])
-        return fig, ax, ewm[-1]
+        return fig, ax, ewm[-2]
 
     ax.legend(["Total", "Average ({})".format(round(mean, 1))])
     return fig, ax

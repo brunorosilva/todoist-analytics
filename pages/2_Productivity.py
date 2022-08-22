@@ -42,6 +42,8 @@ def render():
 
     # Get age of active tasks
     active_tasks = tasks[tasks["added_date"].apply(lambda x: not pd.isnull(x))]
+    active_tasks = active_tasks[active_tasks["due_date"].apply(lambda x: pd.isnull(x))]
+    active_tasks = active_tasks[active_tasks["recurring"].apply(lambda x: not x)]
     age_in_days = (date.today() - active_tasks["added_date"].dt.date).dt.days.rename("Age In Days")
     age_in_weeks = (age_in_days // 7).rename("Age In Weeks")
 
@@ -53,7 +55,7 @@ def render():
                     help="The goal you set for yourself in todoist.")
         col2.metric("Actual Velocity (tasks/day)",
                     "{}".format(round(day_velocity, 1)),
-                    help="Calculated using Exponential Moving Average on 7 days (EMA7).")
+                    help="Calculated using Exponential Moving Average on 7 days (EMA7) for yesterday.")
         col3.metric("Recommended Goal",
                     "{} tasks".format(round(day_velocity * 1.05)),
                     help="5% above actual velocity")
@@ -81,7 +83,7 @@ def render():
                     help="The goal you set for yourself in todoist.")
         col2.metric("Actual Velocity (tasks/week)",
                     "{}".format(round(week_velocity, 1)),
-                    help="Calculated using Exponential Moving Average on 12 weeks (EMA12).")
+                    help="Calculated using Exponential Moving Average on 12 weeks (EMA12) for last week.")
         col3.metric("Recommended Goal",
                     "{} tasks".format(round(week_velocity * 1.05)),
                     help="5% above actual velocity")
