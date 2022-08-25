@@ -7,23 +7,23 @@ from src.utils import is_data_ready
 def expandable_with_tasks(task_list, day, expanded=False):
     today = date.today()
     day_goal = st.session_state["user"].get("daily_goal", 0)
+    completed_list = task_list["due_date"].apply(lambda x: x is pd.NaT).tolist()
 
     if day < today:
         emoji = "🏆" if task_list.shape[0] > day_goal else "❌"
     elif day == today:
-        emoji = "🏆" if task_list["completed_date"].notnull().shape[0] > day_goal else "⌛"
+        emoji = "🏆" if len(completed_list) > day_goal else "⌛"
     else:
         emoji = "⌛" if task_list.shape[0] <= day_goal else "➖"
 
     with st.expander(day.strftime('%A') + " " + emoji + " (" + str(task_list.shape[0]) + ")", expanded=expanded):
-        for completed, task in zip(task_list["due_date"].apply(lambda x: x is pd.NaT).tolist(),
-                                   task_list["content"].tolist()):
+        for i, (task_id, completed, task) in enumerate(zip(task_list["task_id"], completed_list, task_list["content"].tolist())):
             if completed:
                 st.markdown("✔ " + task)
-            elif emoji == "🏆":
-                st.markdown("➖ " + task)
+            elif emoji == "🏆" or i+1 > day_goal:
+                st.markdown("➖ " + task + f" **→** *[open in todoist](https://todoist.com/app/task/{task_id})*")
             else:
-                st.markdown("⌛ " + task)
+                st.markdown("⌛ " + task + f" **→** *[open in todoist](https://todoist.com/app/task/{task_id})*")
 
 
 def render():
@@ -62,17 +62,6 @@ def render():
     # Layout of page
     other_col, now_col, suggestions_col = st.columns([1, 2, 1])
 
-    # Group by day in expanders
-    for day in week_tasks["date"].apply(lambda x: x.date).unique():
-        tasks_in_the_day = week_tasks[week_tasks["date"].apply(lambda x: x.strftime('%A')) == day.strftime('%A')]
-
-        if today == day:
-            with now_col:
-                expandable_with_tasks(tasks_in_the_day, day, expanded=True)
-        else:
-            with other_col:
-                expandable_with_tasks(tasks_in_the_day, day)
-
     # Suggestions
     suggestions = tasks.copy()
     suggestions = suggestions[suggestions["completed_date"].isnull()]
@@ -87,11 +76,28 @@ def render():
         sort_project[project] = i
         projects.remove(project)
 
-    # Rank by age and project
+    # Rank suggestions by priority, rank and age
     suggestions["age"] = (date.today() - suggestions["added_date"].dt.date).dt.days
     suggestions["rank"] = (suggestions["age"].max() - suggestions["age"])/suggestions["age"].max() + \
         suggestions["project_name"].map(sort_project)/len(sort_project)
     suggestions = suggestions.sort_values(by=["priority", "rank", "added_date"], ascending=[False, True, True])
+
+    # Rank week tasks by priority, rank and age
+    week_tasks["age"] = (date.today() - week_tasks["added_date"].dt.date).dt.days
+    week_tasks["rank"] = (week_tasks["age"].max() - week_tasks["age"]) / week_tasks["age"].max() + \
+                          week_tasks["project_name"].map(sort_project) / len(sort_project)
+    week_tasks = week_tasks.sort_values(by=["completed_date", "priority", "rank", "added_date"], ascending=[True, False, True, True])
+
+    # Group by day in expanders
+    for day in week_tasks["date"].apply(lambda x: x.date).unique():
+        tasks_in_the_day = week_tasks[week_tasks["date"].apply(lambda x: x.strftime('%A')) == day.strftime('%A')]
+
+        if today == day:
+            with now_col:
+                expandable_with_tasks(tasks_in_the_day, day, expanded=True)
+        else:
+            with other_col:
+                expandable_with_tasks(tasks_in_the_day, day)
 
     # Display suggestions
     with suggestions_col:
@@ -107,9 +113,11 @@ def render():
 
         for i, (task_id, content) in enumerate(zip(suggestions["task_id"], suggestions["content"])):
             if i < tasks_left:
-                suggestion_list.write("💡 " + content + f" [→ see in todoist](https://todoist.com/app/task/{task_id})")
+                suggestion_list.write("💡 " + content +
+                                      f" **→** *[open in todoist](https://todoist.com/app/task/{task_id})*")
             else:
-                more_suggestions.write("💡 " + content + f" [→ see in todoist](https://todoist.com/app/task/{task_id})")
+                more_suggestions.write("💡 " + content +
+                                       f" **→** *[open in todoist](https://todoist.com/app/task/{task_id})*")
 
 
 if __name__ == "__main__":
