@@ -68,8 +68,8 @@ def run_auth():
     code = params.get("code")
 
     if not code:
-        st.write(f"""<h1>Welcome to Todoist analytics</h1>
-                 <h2>Please login using this <a target="_self" href="{auth_url}">url</a></h2>""",
+        st.title("Welcome to Todoist analytics")
+        st.write(f"""<h2>Please login using this <a target="_self" href="{auth_url}">url</a></h2>""",
                  unsafe_allow_html=True)
     else:
         token = asyncio.run(get_token(code=code))

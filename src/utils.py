@@ -1,7 +1,6 @@
 import streamlit as st
 from src.session import run_auth
 from src.data import DataCollector
-from PIL import Image
 
 
 @st.cache(show_spinner=False)
@@ -13,8 +12,6 @@ def get_data(token):
 def is_data_ready():
     # Set page config
     st.set_page_config(page_title="Todoist Analytics", layout="wide", page_icon="📊")
-    image = Image.open('img/analytics_logo_300x300.png')
-    st.sidebar.image(image, caption='An app to track your tasks, habits and more.')
 
     # Check if user is authenticated and load data
     if 'data_loaded' not in st.session_state:

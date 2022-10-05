@@ -1,6 +1,7 @@
+from datetime import date
 import streamlit as st
 from src.utils import is_data_ready
-from src.plots import category_pie, category_plot, plot_with_average
+from src.plots import category_pie, category_plot, heatmap_plot
 
 
 def render():
@@ -19,11 +20,11 @@ def render():
     col4.metric(label="Tasks with due date", value=due_tasks.shape[0])
     col5.metric(label="Projects", value=tasks["project_name"].nunique()-1)
 
-    # Completed tasks timeline
-    st.header("Completed tasks by day")
-    completed_tasks_per_day = completed_tasks["task_id"].groupby(by=completed_tasks["completed_date"].dt.date)\
-                                                        .count().rename("count")
-    fig, _ = plot_with_average(completed_tasks_per_day, x_label="Date", y_label="# Tasks")
+    # Completed tasks heatmap of the current year
+    st.header(f"Heatmap of completed task in current year")
+    tasks_of_year = completed_tasks[completed_tasks["completed_date"].dt.year == date.today().year]
+    counts_of_year_per_day = tasks_of_year["task_id"].groupby(by=tasks_of_year['completed_date'].dt.date).count()
+    fig, _ = heatmap_plot(counts_of_year_per_day)
     st.pyplot(fig)
 
     # Middle section columns
@@ -41,11 +42,11 @@ def render():
         fig, _ = category_plot(active_tasks, "priority")
         st.pyplot(fig)
 
-    # Due tasks timeline
-    st.header("Due tasks by day")
-    due_tasks_per_day = due_tasks["task_id"].groupby(by=due_tasks["due_date"].dt.date)\
-                                            .count().rename("count")
-    fig, _ = plot_with_average(due_tasks_per_day, x_label="Date", y_label="# Tasks")
+    # Completed tasks heatmap of the current year
+    st.header(f"Heatmap of due task in current year")
+    tasks_of_year = due_tasks[due_tasks["due_date"].dt.year == date.today().year]
+    counts_of_year_per_day = tasks_of_year["task_id"].groupby(by=tasks_of_year['due_date'].dt.date).count()
+    fig, _ = heatmap_plot(counts_of_year_per_day)
     st.pyplot(fig)
 
 

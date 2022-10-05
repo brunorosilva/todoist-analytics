@@ -8,9 +8,8 @@ from src.plots import plot_with_average, histogram
 def render():
     # Title
     st.title("Productivity")
-
-    # Layout of the page
-    day_tab, week_tab = st.tabs(["Day", "Week"])
+    st.sidebar.caption("Change your day and week goals in the [productivity settings]("
+                       "https://todoist.com/app/settings/productivity) inside of todoist.")
 
     # Get all tasks
     tasks = st.session_state["tasks"].copy()
@@ -31,7 +30,7 @@ def render():
     week_fig, ax, week_velocity = plot_with_average(completed_tasks_per_week,
                                                     x_label="Week",
                                                     y_label="# Tasks",
-                                                    ema=12)
+                                                    ema=13)
     for i, tick in enumerate(ax.xaxis.get_major_ticks()):
         if i % 15 != 5:
             tick.label1.set_visible(False)
@@ -45,63 +44,46 @@ def render():
     active_tasks = active_tasks[active_tasks["due_date"].apply(lambda x: pd.isnull(x))]
     active_tasks = active_tasks[active_tasks["recurring"].apply(lambda x: not x)]
     age_in_days = (date.today() - active_tasks["added_date"].dt.date).dt.days.rename("Age In Days")
-    age_in_weeks = (age_in_days // 7).rename("Age In Weeks")
 
-    with day_tab:
-        # Goals, velocity and recommendation
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Daily Goal",
-                    "{} tasks".format(daily_goal),
-                    help="The goal you set for yourself in todoist.")
-        col2.metric("Actual Velocity (tasks/day)",
-                    "{}".format(round(day_velocity, 1)),
-                    help="Calculated using Exponential Moving Average on 7 days (EMA7) for yesterday.")
-        col3.metric("Recommended Goal",
-                    "{} tasks".format(round(day_velocity * 1.05)),
-                    help="5% above actual velocity")
-        st.pyplot(day_fig)
+    # Goals, velocity and recommendation
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Daily Goal",
+                "{} tasks".format(daily_goal),
+                help="The goal you set for yourself in todoist.")
+    col2.metric("Actual Velocity (tasks/day)",
+                "{}".format(round(day_velocity, 1)),
+                help="Calculated using Exponential Moving Average on 7 days (EMA7) for yesterday.")
+    col3.metric("Recommended Goal",
+                "{} tasks".format(round(day_velocity * 1.05)),
+                help="5% above actual velocity")
+    st.pyplot(day_fig)
 
-        # WIP, age, and lead time
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Work In Progress",
-                    "{} tasks".format(active_tasks.shape[0]),
-                    help="Current amount of active tasks.")
-        col2.metric("Average Age",
-                    "{} days".format(round(age_in_days.mean(), 1)),
-                    help="Average age since tasks were created.")
-        col3.metric("Lead time",
-                    "{} days".format(round(active_tasks.shape[0] / day_velocity, 1)),
-                    help="Expected amount of time to complete a task once its created.")
-        fig, _ = histogram(age_in_days)
-        st.pyplot(fig)
+    # Goals, velocity and recommendation
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Weekly Goal",
+                "{} tasks".format(weekly_goal),
+                help="The goal you set for yourself in todoist.")
+    col2.metric("Actual Velocity (tasks/week)",
+                "{}".format(round(week_velocity, 1)),
+                help="Calculated using Exponential Moving Average on 13 weeks (EMA13) for last week.")
+    col3.metric("Recommended Goal",
+                "{} tasks".format(round(week_velocity * 1.05)),
+                help="5% above actual velocity")
+    st.pyplot(week_fig)
 
-    with week_tab:
-        # Goals, velocity and recommendation
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Weekly Goal",
-                    "{} tasks".format(weekly_goal),
-                    help="The goal you set for yourself in todoist.")
-        col2.metric("Actual Velocity (tasks/week)",
-                    "{}".format(round(week_velocity, 1)),
-                    help="Calculated using Exponential Moving Average on 12 weeks (EMA12) for last week.")
-        col3.metric("Recommended Goal",
-                    "{} tasks".format(round(week_velocity * 1.05)),
-                    help="5% above actual velocity")
-        st.pyplot(week_fig)
-
-        # WIP, age, and lead time
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Work In Progress",
-                    "{} tasks".format(active_tasks.shape[0]),
-                    help="Current amount of active tasks.")
-        col2.metric("Average Age",
-                    "{} weeks".format(round(age_in_weeks.mean(), 1)),
-                    help="Average age since tasks were created.")
-        col3.metric("Lead time",
-                    "{} weeks".format(round(active_tasks.shape[0] / week_velocity, 1)),
-                    help="Expected amount of time to complete a task once its created.")
-        fig, _ = histogram(age_in_weeks)
-        st.pyplot(fig)
+    # WIP, age, and lead time
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Work In Progress",
+                "{} tasks".format(active_tasks.shape[0]),
+                help="Current amount of active tasks.")
+    col2.metric("Average Age",
+                "{} days".format(round(age_in_days.mean(), 1)),
+                help="Average age since tasks were created.")
+    col3.metric("Lead time",
+                "{} days".format(round(active_tasks.shape[0] / day_velocity, 1)),
+                help="Expected amount of time to complete a task once its created.")
+    fig, _ = histogram(age_in_days)
+    st.pyplot(fig)
 
 
 if __name__ == "__main__":
