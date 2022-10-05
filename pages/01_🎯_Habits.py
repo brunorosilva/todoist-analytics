@@ -6,12 +6,15 @@ from src.plots import plot_with_average, calendar_plot, month_plot
 
 def habits_and_goals_metrics(goal, actual, habits):
     col1, col2, col3 = st.columns(3)
+    habits_delta = (habits / actual) / goal - 1 if actual > 0 and goal > 0 else 0.0
+    non_habits_delta = ((actual-habits) / actual) / (1-goal) - 1 if actual > 0 and (1-goal) > 0 else 0.0
+    score = 1 + non_habits_delta if habits_delta > 0.0 else habits_delta + 1
     col1.metric("Completed tasks", actual, delta_color="off",
-                delta="{:.0%}".format((habits / actual) / goal if actual > 0 else 0))
+                delta="{:.0%}".format(score))
     col2.metric("Habits", habits,
-                delta="{:.0%}".format((habits / actual) / goal - 1 if actual > 0 else 0))
+                delta="{:.0%}".format(habits_delta))
     col3.metric("Non-Habits", actual-habits,
-                delta="{:.0%}".format(((actual-habits) / actual) / (1-goal) - 1 if actual > 0 else 0))
+                delta="{:.0%}".format(non_habits_delta))
 
 
 def render():
