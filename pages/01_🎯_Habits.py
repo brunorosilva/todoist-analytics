@@ -1,27 +1,31 @@
 import streamlit as st
+from datetime import date, timedelta
 from src.utils import is_data_ready
-from src.plots import calendar_plot, month_plot
+from src.plots import plot_with_average, calendar_plot, month_plot
 
 
-def tasks_and_habits_metrics(all_tasks, all_habits, m, goal, a, b):
-    n_tasks = all_tasks[all_tasks["completed_date"].dt.month == m].shape[0]
-    n_habits = all_habits[all_habits["completed_date"].dt.month == m].shape[0]
-    with a:
-        st.metric("Completed tasks", n_tasks,
-                  delta="{:.0%}".format((n_habits / n_tasks) / goal if n_tasks > 0 else 0))
-    with b:
-        st.metric("Habits", n_habits,
-                  delta="{:.0%}".format((n_habits / n_tasks) / goal - 1 if n_tasks > 0 else 0))
+def habits_and_goals_metrics(goal, actual, habits):
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Completed tasks", actual, delta_color="off",
+                delta="{:.0%}".format((habits / actual) / goal if actual > 0 else 0))
+    col2.metric("Habits", habits,
+                delta="{:.0%}".format((habits / actual) / goal - 1 if actual > 0 else 0))
+    col3.metric("Non-Habits", actual-habits,
+                delta="{:.0%}".format(((actual-habits) / actual) / (1-goal) - 1 if actual > 0 else 0))
+
 
 def render():
     # Title
     st.title("Habits")
 
+    # Layout of app
+    week_tab, month_tab, quarter_tab = st.tabs(["Week", "Month", "Quarter"])
+
     # Sidebar notes
     st.sidebar.caption("Habits are recurring tasks completed at least twice.")
     habit_percentage = st.sidebar.slider(label="Percentage slider",
-                                         min_value=0,
-                                         max_value=100,
+                                         min_value=1,
+                                         max_value=99,
                                          value=30,
                                          format="%i%%") / 100.0
 
@@ -33,8 +37,7 @@ def render():
     years = tasks["completed_date"].dt.year.unique().tolist()
 
     # Filter by year
-    with st.sidebar:
-        year = st.selectbox("Year", years)
+    year = st.sidebar.selectbox("Year", years)
 
     # Filter tasks of the selected year
     tasks_of_year = tasks[tasks["completed_date"].dt.year == year]
@@ -45,33 +48,86 @@ def render():
                    'July', 'August', 'September', 'October', 'November', 'December']
 
     # Get all the months in the data and filter for the selected month
-    with st.sidebar:
-        month_name = st.selectbox("Month", [month_names[m-1] for m in months])
+    month_name = st.sidebar.selectbox("Month", [month_names[m-1] for m in months])
 
     # Filter tasks of the selected month, get the quarter of the selected month and filter for the selected quarter
     month = month_names.index(month_name) + 1
-    tasks_of_lasts_months = tasks_of_year[tasks_of_year["completed_date"].apply(lambda x: x.month == month or
-                                                                                x.month == month-1 or
-                                                                                x.month == month-2)]
+    quarter = (month - 1) // 3 + 1
+    tasks_of_quarter = tasks_of_year[tasks_of_year["completed_date"].dt.quarter == quarter]
+    tasks_of_month = tasks_of_quarter[tasks_of_quarter["completed_date"].dt.month == month]
+
+    # Days help array
+    days = tasks_of_month["completed_date"].dt.day.unique().tolist()
+
+    # Get all the days in the data and filter for the selected day
+    day = st.sidebar.selectbox("Day", days)
+    st.sidebar.date_input("When's your birthday", date.today())
+
+    # Get the week that belongs to the selected day, filter for the selected week and filter for the selected day
+    start_day = 8 - st.session_state["user"]["start_day"]
+    week = (date(year, month, day) + timedelta(days=start_day)) .isocalendar()[1]
+    tasks_of_week = tasks_of_year[(tasks_of_year["completed_date"] +
+                                   timedelta(days=start_day)).dt.isocalendar().week == week]
+
     # Filter for habits
     habits = tasks[tasks.duplicated(subset=["task_id"], keep=False)]
     habits_of_year = habits[habits["completed_date"].dt.year == year]
-    habits_of_lasts_months = habits_of_year[tasks_of_year["completed_date"].apply(lambda x: x.month == month or
-                                                                                  x.month == month-1 or
-                                                                                  x.month == month-2)]
+    habits_of_quarter = habits_of_year[habits_of_year["completed_date"].dt.quarter == quarter]
+    habits_of_month = habits_of_quarter[habits_of_quarter["completed_date"].dt.month == month]
+    habits_of_week = habits_of_year[(habits_of_year["completed_date"] +
+                                     timedelta(days=start_day)).dt.isocalendar().week == week]
     # Get the number of aggregated tasks per day
     counts_of_year_per_day = tasks_of_year["task_id"].groupby(by=tasks_of_year['completed_date'].dt.date).count()
-    counts_of_lasts_months_per_day = counts_of_year_per_day[tasks_of_lasts_months['completed_date'].dt.date]
+    counts_of_quarter_per_day = counts_of_year_per_day[tasks_of_quarter['completed_date'].dt.date]
+    counts_of_month_per_day = counts_of_quarter_per_day[tasks_of_month['completed_date'].dt.date]
+    counts_of_week_per_day = counts_of_year_per_day[tasks_of_week['completed_date'].dt.date]
 
-    # Habits percentages and number of tasks
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    tasks_and_habits_metrics(tasks_of_lasts_months, habits_of_lasts_months, month-2, habit_percentage, col1, col2)
-    tasks_and_habits_metrics(tasks_of_lasts_months, habits_of_lasts_months, month-1, habit_percentage, col3, col4)
-    tasks_and_habits_metrics(tasks_of_lasts_months, habits_of_lasts_months, month-0, habit_percentage, col5, col6)
+    # Get the number of aggregated tasks per month
+    counts_of_year_per_month = tasks_of_year["task_id"].groupby(by=tasks_of_year['completed_date'].dt.month).count()
+    counts_of_quarter_per_month = counts_of_year_per_month[tasks_of_quarter['completed_date'].dt.month]
+    counts_of_year_per_month.set_axis([month_names[i - 1] for i in counts_of_year_per_month.index], inplace=True)
+    counts_of_quarter_per_month.set_axis([month_names[i - 1] for i in counts_of_quarter_per_month.index], inplace=True)
 
-    # Heatmap of last 3 months
-    fig, _ = calendar_plot(counts_of_lasts_months_per_day)
-    st.pyplot(fig)
+    # Quarter tab: calendar, category pie and plot with average
+    with quarter_tab:
+        habits_and_goals_metrics(habit_percentage, tasks_of_quarter.shape[0], habits_of_quarter.shape[0])
+        st.header("Calendar heatmap view")
+        fig, _ = calendar_plot(counts_of_quarter_per_day)
+        st.pyplot(fig)
+        st.header("Tasks by day")
+        fig2, _ = plot_with_average(counts_of_quarter_per_day,
+                                    x_label="Day",
+                                    y_label="# Tasks",
+                                    figsize=(9, 4),
+                                    labelrotation=30)
+        st.pyplot(fig2)
+
+    # Month tab: calendar, category pie and plot with average
+    with month_tab:
+        habits_and_goals_metrics(habit_percentage, tasks_of_month.shape[0], habits_of_month.shape[0])
+        fig, _ = month_plot(counts_of_month_per_day, month)
+        fig2, _ = plot_with_average(counts_of_month_per_day,
+                                    x_label="Day",
+                                    y_label="# Tasks",
+                                    figsize=(9, 4),
+                                    labelrotation=30)
+
+        col1, col2 = st.columns(2)
+        col1.header("Calendar heatmap view")
+        col1.pyplot(fig)
+        col2.header("Tasks by day")
+        col2.pyplot(fig2)
+
+    # Week tab: category pie and plot with average
+    with week_tab:
+        habits_and_goals_metrics(habit_percentage, tasks_of_week.shape[0], habits_of_week.shape[0])
+        fig, _ = plot_with_average(counts_of_week_per_day,
+                                   x_label="Day",
+                                   y_label="# Tasks",
+                                   figsize=(9, 4),
+                                   labelrotation=30)
+        st.header("Tasks by day")
+        st.pyplot(fig)
 
 
 if __name__ == "__main__":
