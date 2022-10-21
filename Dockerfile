@@ -14,6 +14,6 @@ COPY pages/01_*_Habits_and_Goals.py "/app/pages/01_🎯_Habits_and_Goals.py"
 COPY pages/02_*_Productivity.py "/app/pages/02_📈_Productivity.py"
 COPY pages/03_*_Planning.py "/app/pages/03_📝_Planning.py"
 
-EXPOSE 80
+EXPOSE 8080
 
-ENTRYPOINT ["streamlit", "run", "🏠_Homepage.py", "--server.port", "80"]
+ENTRYPOINT ["streamlit", "run", "🏠_Homepage.py", "--server.port", "8080"]
