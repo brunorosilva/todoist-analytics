@@ -23,12 +23,12 @@ checks:
 	@poetry run safety check --full-report
 
 # build documentation 
-docs:
+sphinx_docs:
 	poetry run sphinx-build -a docs docs/site
 
 # show documentation in browser
 show:
-	start docs/site/index.html
+	open -a "Google Chrome" docs/site/index.html
 
 # publish documentation to Github Pages
 pages:
@@ -36,7 +36,7 @@ pages:
 
 # create rst source for API documentation
 apidoc:
-	sphinx-apidoc -o docs src/{{package}}
+	@poetry run sphinx-apidoc -o docs src/{{package}}
 
 
 container:
