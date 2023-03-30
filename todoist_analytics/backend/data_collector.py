@@ -24,6 +24,7 @@ class DataCollector:
 
     def _collect_completed_tasks(self, limit, offset):
         data = self.api.completed.get_all(limit=limit, offset=offset)
+        print(data)
         if data == "Service Unavailable\n":
             time.sleep(3)
             data = self._collect_completed_tasks(limit, offset)

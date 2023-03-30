@@ -4,6 +4,8 @@ todoist_analytics/credentials.py
 # local folders
 todoist_analytics/backend/db
 
+.streamlit/secrets.toml
+
 # more hidden folders
 .venv/
 .vscode/
