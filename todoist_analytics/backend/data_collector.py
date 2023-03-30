@@ -14,7 +14,7 @@ class DataCollector:
         self.items = pd.DataFrame()
         self.projects = pd.DataFrame()
         self.api = todoist.TodoistAPI(
-            self.token, api_endpoint="https://api.todoist.com/sync/v9/"
+            self.token, api_version="v9"
         )
         self.api.sync()
         self.current_offset = 0
