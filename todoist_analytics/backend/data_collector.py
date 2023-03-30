@@ -1,7 +1,8 @@
 import time
-import streamlit as st
+
 import numpy as np
 import pandas as pd
+import streamlit as st
 import todoist
 
 from todoist_analytics.frontend.colorscale import color_code_to_hex
@@ -12,7 +13,9 @@ class DataCollector:
         self.token = token
         self.items = pd.DataFrame()
         self.projects = pd.DataFrame()
-        self.api = todoist.TodoistAPI(self.token)
+        self.api = todoist.TodoistAPI(
+            self.token, api_endpoint="https://api.todoist.com/sync/v9/"
+        )
         self.api.sync()
         self.current_offset = 0
 
