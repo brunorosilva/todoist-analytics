@@ -2,8 +2,8 @@ import time
 
 import numpy as np
 import pandas as pd
-import todoist
-
+from todoist_api_python.api import TodoistAPI
+import streamlit as st
 from todoist_analytics.frontend.colorscale import color_code_to_hex
 
 
@@ -12,8 +12,7 @@ class DataCollector:
         self.token = token
         self.items = pd.DataFrame()
         self.projects = pd.DataFrame()
-        self.api = todoist.TodoistAPI(self.token)
-        self.api.sync()
+        self.api = TodoistAPI(self.token)
         self.current_offset = 0
 
     def get_user_timezone(self):
@@ -23,13 +22,14 @@ class DataCollector:
         pass
 
     def _collect_completed_tasks(self, limit, offset):
-        data = self.api.completed.get_all(limit=limit, offset=offset)
-        if data == "Service Unavailable\n":
-            time.sleep(3)
-            data = self._collect_completed_tasks(limit, offset)
-        else:
-            if len(data["items"]) != 0:
-                self._append_to_properties(data)
+        data = self.api.get_tasks()
+        st.markdown(data)
+        # if data == "Service Unavailable\n":
+        #     time.sleep(3)
+        #     data = self._collect_completed_tasks(limit, offset)
+        # else:
+        #     if len(data["items"]) != 0:
+        #         self._append_to_properties(data)
 
     def _append_to_properties(self, data):
         preprocessed_items, preprocessed_projects = self._preprocess_completed_tasks(
