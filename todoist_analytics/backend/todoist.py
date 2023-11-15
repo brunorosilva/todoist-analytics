@@ -5,7 +5,7 @@ class TodoistAPI:
       self.token = token
       self.endpoint = "https://api.todoist.com/sync/v9"
       self.session = requests.Session()
-      self.session.auth = BearerAuth(self.token)
+      self.session.headers["Authorization"] = f"Bearer {self.token}"
    
    def sync(self):
       response = self.session.post(f"{self.endpoint}/sync", data={
@@ -19,11 +19,3 @@ class TodoistAPI:
          f"{self.endpoint}/completed/get_all",
          params={ "limit": limit, "offset": offset }
       ).json()
-   
-class BearerAuth(requests.auth.AuthBase):
-   def __init__(self, token):
-      self.token = token
-      
-   def __call__(self, r):
-      r.headers["Authorization"] = "Bearer " + self.token
-      return r
