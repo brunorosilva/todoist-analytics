@@ -2,17 +2,15 @@ import time
 
 import numpy as np
 import pandas as pd
-import todoist
-
-from todoist_analytics.frontend.colorscale import color_code_to_hex
-
+from todoist_analytics.backend.todoist import TodoistAPI
+from todoist_analytics.frontend.colorscale import color_name_to_hex
 
 class DataCollector:
     def __init__(self, token):
         self.token = token
         self.items = pd.DataFrame()
         self.projects = pd.DataFrame()
-        self.api = todoist.TodoistAPI(self.token)
+        self.api = TodoistAPI(token)
         self.api.sync()
         self.current_offset = 0
 
@@ -23,7 +21,7 @@ class DataCollector:
         pass
 
     def _collect_completed_tasks(self, limit, offset):
-        data = self.api.completed.get_all(limit=limit, offset=offset)
+        data = self.api.get_all_completed(limit=limit, offset=offset)
         if data == "Service Unavailable\n":
             time.sleep(3)
             data = self._collect_completed_tasks(limit, offset)
@@ -58,13 +56,8 @@ class DataCollector:
                 self.current_offset = new_shape
                 stop_collecting = True
 
-    def _state_to_dataframe(self, state, key):
-        f = [d.data for d in state[str(key)]]
-        f = pd.DataFrame(f)
-        return f
-
     def _collect_active_tasks(self):
-        self.active_tasks = self._state_to_dataframe(self.api.state, "items")
+        self.active_tasks = pd.DataFrame(self.api.state["items"])
         keep_columns = [
             "checked",
             "content",
@@ -74,7 +67,7 @@ class DataCollector:
             "labels",
             "priority",
             "project_id",
-            "date_added",
+            "added_at",
             "id",
         ]
         self.active_tasks = self.active_tasks[keep_columns]
@@ -85,7 +78,7 @@ class DataCollector:
         projects = projects.rename({"id": "project_id"}, axis=1)
 
         completed_tasks["datehour_completed"] = pd.to_datetime(
-            completed_tasks["completed_date"]
+            completed_tasks["completed_at"]
         )
 
         self.get_user_timezone()
@@ -121,9 +114,10 @@ class DataCollector:
         )
 
         completed_tasks["hex_color"] = completed_tasks["color"].apply(
-            lambda x: color_code_to_hex[int(x)]["hex"]
+            lambda x: color_name_to_hex[x]
         )
 
+        completed_tasks.drop("notes", axis=1, inplace=True)
         completed_tasks = completed_tasks.drop_duplicates().reset_index(drop=True)
 
         return completed_tasks, projects
