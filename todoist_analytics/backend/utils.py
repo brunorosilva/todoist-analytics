@@ -4,8 +4,6 @@ import streamlit as st
 from pandas.core.frame import DataFrame
 
 from todoist_analytics.backend.data_collector import DataCollector
-from todoist_analytics.frontend.colorscale import color_code_to_hex
-
 
 def create_color_palette(completed_tasks: DataFrame):
     project_id_color = pd.Series(
