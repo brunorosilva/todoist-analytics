@@ -10,7 +10,9 @@ from typing import Tuple
 
 import toml
 
-AUTHOR_REGEX = re.compile(r"^(?P<name>[- .,\w\d'’\"()\{\}]+)(?: <(?P<email>.+?)>)?$")
+AUTHOR_REGEX = re.compile(
+    r"^(?P<name>[- .,\w\d'’\"()\{\}]+)(?: <(?P<email>.+?)>)?$"
+)  # noqa
 PATH = os.path.join("..", "pyproject.toml")
 
 

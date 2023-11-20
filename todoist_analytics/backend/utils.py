@@ -1,10 +1,8 @@
-import numpy as np
 import pandas as pd
 import streamlit as st
 from pandas.core.frame import DataFrame
 
 from todoist_analytics.backend.data_collector import DataCollector
-from todoist_analytics.frontend.colorscale import color_code_to_hex
 
 
 def create_color_palette(completed_tasks: DataFrame):
@@ -18,8 +16,9 @@ def create_color_palette(completed_tasks: DataFrame):
 def get_data(token):
     dc = DataCollector(token)
     dc._collect_all_completed_tasks()
-    dc._collect_active_tasks()
-    active_tasks = dc.active_tasks
+    # dc._collect_active_tasks()
+    # active_tasks = dc.active_tasks
+    active_tasks = None
     completed_tasks = dc.items
     return completed_tasks, active_tasks
 

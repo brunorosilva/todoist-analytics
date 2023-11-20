@@ -130,7 +130,6 @@ def completed_tasks_per_day_per_project(
 def one_hundred_stacked_bar_plot_per_project(
     completed_tasks: DataFrame, color_palette: dict
 ) -> FigureWidget:
-
     daily_completed_tasks_per_project = (
         completed_tasks[
             ["completed_date", "project_id", "id", "project_name", "content"]
@@ -199,7 +198,6 @@ def calendar_task_plot(completed_tasks: DataFrame) -> FigureWidget:
 def each_project_total_percentage_plot(
     completed_tasks: DataFrame, color_palette: dict
 ) -> FigureWidget:
-
     daily_completed_tasks_per_project = (
         completed_tasks[["project_id", "id", "project_name", "content", "hex_color"]]
         .groupby(["project_name", "hex_color", "project_id"], as_index=False)

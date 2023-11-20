@@ -4,18 +4,29 @@ from PIL import Image
 from todoist_analytics.backend.auth import run_auth
 from todoist_analytics.backend.utils import create_color_palette, get_data
 from todoist_analytics.credentials import client_id, client_secret
-from todoist_analytics.frontend.filters import (date_filter, last_month_filter,
-                                                last_seven_days_filter,
-                                                last_week_filter,
-                                                last_year_filter,
-                                                project_filter, weekend_filter)
-from todoist_analytics.frontend.habit_tracker import (filter_recurrent_task,
-                                                      get_recurrent_tasks)
+from todoist_analytics.frontend.filters import (
+    date_filter,
+    last_month_filter,
+    last_seven_days_filter,
+    last_week_filter,
+    last_year_filter,
+    project_filter,
+    weekend_filter,
+)
+from todoist_analytics.frontend.habit_tracker import (
+    filter_recurrent_task,
+    get_recurrent_tasks,
+)
 from todoist_analytics.frontend.plots import (
-    calendar_habits_plot, calendar_task_plot, completed_tasks_per_day,
-    completed_tasks_per_day_per_project, create_metrics_cards,
-    day_of_week_ridgeline_plot, each_project_total_percentage_plot,
-    one_hundred_stacked_bar_plot_per_project)
+    calendar_habits_plot,
+    calendar_task_plot,
+    completed_tasks_per_day,
+    completed_tasks_per_day_per_project,
+    create_metrics_cards,
+    day_of_week_ridgeline_plot,
+    each_project_total_percentage_plot,
+    one_hundred_stacked_bar_plot_per_project,
+)
 
 
 def create_app():
@@ -28,11 +39,13 @@ def create_app():
     token = run_auth(client_id=client_id, client_secret=client_secret)
 
     if token is not None:
-
         with st.spinner("Getting your data :)"):
-
             completed_tasks, active_tasks = get_data(token)
             completed_tasks_habits = completed_tasks.copy()
+
+        # filter_to_custom_project = lambda x: x["project_id"]=='2269293248'
+        # filter_object = filter(filter_to_custom_project, active_tasks)
+        # st.markdown(list(t.__repr__ for t in filter_object))
 
         completed_tasks = date_filter(completed_tasks, "date range filter")
         completed_tasks = last_week_filter(completed_tasks, "filter current week")
@@ -49,8 +62,8 @@ def create_app():
         create_metrics_cards(completed_tasks, list(st.columns(4)), remove_weekends)
 
         st.markdown(
-            f"Analyzing data since {completed_tasks.completed_date.min()} until {completed_tasks.completed_date.max()}"
-        )
+            f"Analyzing data since {completed_tasks.completed_date.min()} until {completed_tasks.completed_date.max()}"  # noqa
+        )  # noqa
 
         completed_tasks_radio = st.radio("Choose your view", ["total", "per project"])
 
@@ -60,7 +73,6 @@ def create_app():
         if completed_tasks_radio == "total":
             figs.append(completed_tasks_per_day(completed_tasks))
         else:
-
             figs.append(
                 completed_tasks_per_day_per_project(completed_tasks, color_palette)
             )
@@ -99,4 +111,4 @@ def create_app():
 
 
 if __name__ == "__main__":
-    app = create_app()
+    app = create_app()  # noqa
