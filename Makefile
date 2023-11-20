@@ -18,7 +18,7 @@ lint:
 
 checks:
 	@poetry run flake8 .
-	@poetry run vulture .
+	@poetry run vulture todoist_analytics
 	@poetry run poetry check
 	@poetry run safety check --full-report
 
