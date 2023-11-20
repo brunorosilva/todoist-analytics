@@ -16,6 +16,7 @@ altair = "^4.0"
 streamlit = "^1.25.0"
 flask = "^3.0.0"
 requests = "^2.31.0"
+requests-mock = "^1.11.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
