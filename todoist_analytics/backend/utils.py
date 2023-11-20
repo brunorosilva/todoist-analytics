@@ -14,7 +14,7 @@ def create_color_palette(completed_tasks: DataFrame):
     return project_id_color
 
 
-@st.cache(show_spinner=False)  # caching the data and hiding the spinner warning
+@st.cache_data(show_spinner=False)  # caching the data and hiding the spinner warning
 def get_data(token):
     dc = DataCollector(token)
     dc._collect_all_completed_tasks()
