@@ -3,7 +3,6 @@ from PIL import Image
 
 from todoist_analytics.backend.auth import run_auth
 from todoist_analytics.backend.utils import create_color_palette, get_data
-from todoist_analytics.credentials import client_id, client_secret
 from todoist_analytics.frontend.filters import (
     date_filter,
     last_month_filter,
@@ -36,6 +35,8 @@ def create_app():
     )
     st.title("Todoist Analytics Report")
 
+    client_id = st.secrets.todoist_credentials.app_client_id
+    client_secret = st.secrets.todoist_credentials.app_secret
     token = run_auth(client_id=client_id, client_secret=client_secret)
 
     if token is not None:
