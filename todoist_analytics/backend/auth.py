@@ -27,7 +27,7 @@ def run_auth(client_id, client_secret):
 
     if "token" not in session:
         try:
-            code = st.experimental_get_query_params()["code"]
+            code = st.query_params.get("code")
         except:  # noqa
             st.write(
                 f"""<h1>

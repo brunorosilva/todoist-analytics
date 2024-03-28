@@ -196,8 +196,8 @@ def calendar_task_plot(completed_tasks: DataFrame) -> FigureWidget:
 
 
 def each_project_total_percentage_plot(
-    completed_tasks: DataFrame, color_palette: dict
-) -> FigureWidget:
+    completed_tasks: pd.DataFrame, color_palette: dict
+) -> go.FigureWidget:
     daily_completed_tasks_per_project = (
         completed_tasks[["project_id", "id", "project_name", "content", "hex_color"]]
         .groupby(["project_name", "hex_color", "project_id"], as_index=False)
@@ -214,43 +214,41 @@ def each_project_total_percentage_plot(
         1,
     )
 
-    # this is lazy code writing, the right way to do this
-    # is to use graph_objects Bars (in loop) with texttemplate
-    # in order to add a percent sign after the value, but as
-    # I'm using plotly express, this is lazy way is much easier
-    daily_completed_tasks_per_project["pct_of_total_str"] = (
-        daily_completed_tasks_per_project["pct_of_total"].astype(str) + " %"
+    # Sort by decreasing contribution
+    daily_completed_tasks_per_project = daily_completed_tasks_per_project.sort_values(
+        by="pct_of_total", ascending=True
     )
 
-    # TODO - add this plot to the above one as a subplot
-    # TODO - change from express to graph objects
-    # TODO - fix the color (duplicated project names break colors)
-    daily_completed_tasks_per_project["project_id"] = daily_completed_tasks_per_project[
-        "project_id"
-    ].astype(str)
-    daily_completed_tasks_per_project["zero"] = 0
-    fig = px.bar(
-        daily_completed_tasks_per_project,
-        x="pct_of_total",
-        y="zero",
-        text="pct_of_total_str",
-        orientation="h",
-        color="project_name",
-        hover_data=["id"],
-        hover_name="project_name",
-        labels={
-            "pct_of_total": "% of total tasks",
-            "project_id": "",
-            "project_name": "Project",
-            "id": "tasks amount",
-        },
-        color_discrete_sequence=daily_completed_tasks_per_project["hex_color"],
+    # Create stacked horizontal bar plot
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Bar(
+            y=daily_completed_tasks_per_project["project_name"],
+            x=daily_completed_tasks_per_project["pct_of_total"],
+            text=(
+                daily_completed_tasks_per_project["pct_of_total"].astype(str) 
+                + " %<br>"
+                + daily_completed_tasks_per_project["id"].astype(str) 
+                + " tasks"
+            ),
+            textposition="inside",
+            marker=dict(
+                color=daily_completed_tasks_per_project["hex_color"],
+            ),
+            orientation="h",
+            hoverinfo="y+text",
+        )
     )
 
-    fig.update_traces(textposition="inside")
-    fig.update_layout(title_text="Percentage of tasks per project")
-    fig.update_yaxes(visible=False)
+    fig.update_layout(
+        title="Percentage of tasks per project",
+        xaxis=dict(title="% of total tasks"),
+        yaxis=dict(title="Project"),
+    )
+
     return fig
+
 
 
 def calendar_habits_plot(completed_tasks_habits: DataFrame):
@@ -316,12 +314,11 @@ def day_of_week_ridgeline_plot(completed_tasks: DataFrame):
         average_of_weekday = round(
             daily_completed_tasks.loc[daily_completed_tasks["weekday"] == weekday][
                 "id"
-            ].mean(),
-            1,
+            ].mean()
         )
         daily_completed_tasks["weekday_name_with_average"] = daily_completed_tasks[
             "weekday_name"
-        ].apply(lambda x: str(x) + "<br>average " + str(average_of_weekday))
+        ].apply(lambda x: str(x) + "<br>mean " + str(average_of_weekday))
 
         fig.add_trace(
             go.Violin(
@@ -336,12 +333,13 @@ def day_of_week_ridgeline_plot(completed_tasks: DataFrame):
                 side="positive",
                 meanline_visible=True,
                 width=1,
-                name="distribuition",
+                name="distribution",
+                hoveron="violins",
             )
         )
     fig.update_traces(points=False, spanmode="hard")
     fig.update_layout(
-        title="completed tasks per weekday",
+        title="Completed Tasks per Weekday",
         showlegend=False,
         xaxis=dict(tickmode="linear", tick0=1, dtick=1, showgrid=False),
     )

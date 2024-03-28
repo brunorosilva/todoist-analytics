@@ -27,7 +27,7 @@ from todoist_analytics.frontend.plots import (
     one_hundred_stacked_bar_plot_per_project,
 )
 
-
+# from todoist_analytics.credentials import client_id, client_secret
 def create_app():
     todoist_logo = Image.open("assets/images/todoist_logo.png")
     st.set_page_config(
