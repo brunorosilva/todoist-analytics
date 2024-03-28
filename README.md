@@ -3,7 +3,7 @@
 ![version](https://img.shields.io/badge/version-0.0.1-brightgreen)
 
 # MVP available
-[Click here and authorize it](https://todoist-analytics-cq88pyboczvba4ohkujmys.streamlit.app)
+[Click here and authorize it](https://todoist-analytics.streamlit.app)
 
 <p align=center>
 <img src='assets/images/analytics_logo.png' width=200>
