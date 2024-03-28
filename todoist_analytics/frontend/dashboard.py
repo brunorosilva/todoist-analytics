@@ -35,8 +35,8 @@ def create_app():
     )
     st.title("Todoist Analytics Report")
 
-    client_id = st.secrets.todoist_credentials.app_client_id
-    client_secret = st.secrets.todoist_credentials.app_secret
+    client_id = st.secrets.app_client_id
+    client_secret = st.secrets.app_secret
     token = run_auth(client_id=client_id, client_secret=client_secret)
 
     if token is not None:
