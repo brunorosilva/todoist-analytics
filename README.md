@@ -3,7 +3,7 @@
 ![version](https://img.shields.io/badge/version-0.0.1-brightgreen)
 
 # MVP available
-[Click here and authorize it](https://todoist-analytics-mvp.herokuapp.com/)
+[Click here and authorize it](https://todoist-analytics-cq88pyboczvba4ohkujmys.streamlit.app)
 
 <p align=center>
 <img src='assets/images/analytics_logo.png' width=200>
@@ -37,7 +37,7 @@ The main goal for this tool is to help you keep track and create analytics based
 - [ ] Part 4: Drop Streamlit
 Develop a Flask backend and a React frontend for better usage
 
-- [ ] Part 5: Cloud it up
+- [x] Part 5: Cloud it up
 
 
 

@@ -3,13 +3,9 @@ import asyncio
 import requests
 import streamlit as st
 
-from todoist_analytics.backend import session_state
-
 
 async def get_auth(client_id, client_secret):
-
-    authorization_url = f"https://todoist.com/oauth/authorize?client_id={client_id}&scope=data:read&state={client_secret}"
-    # res = requests.get(authorization_url)
+    authorization_url = f"https://todoist.com/oauth/authorize?client_id={client_id}&scope=data:read&state={client_secret}"  # noqa
     return authorization_url
 
 
@@ -25,15 +21,14 @@ async def get_token(client_id, client_secret, code):
 
 
 def run_auth(client_id, client_secret):
-
     # auth stuff
     auth_url = asyncio.run(get_auth(client_id, client_secret))
-    session = session_state.get(token=None)
+    session = st.session_state
 
-    if session.token is None:
+    if "token" not in session:
         try:
-            code = st.experimental_get_query_params()["code"]
-        except:
+            code = st.query_params.get("code")
+        except:  # noqa
             st.write(
                 f"""<h1>
             Please login using this <a target="_self"
@@ -43,7 +38,7 @@ def run_auth(client_id, client_secret):
         else:
             try:
                 token = asyncio.run(get_token(client_id, client_secret, code=code))
-            except:
+            except:  # noqa
                 st.write(
                     f"""<h1>
                     This page was refreshed.
@@ -57,4 +52,3 @@ def run_auth(client_id, client_secret):
 
     else:
         return session.token
-    # end auth

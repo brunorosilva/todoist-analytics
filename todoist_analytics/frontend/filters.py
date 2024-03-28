@@ -8,7 +8,10 @@ from pandas.core.frame import DataFrame
 def date_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
     date_filter = st.sidebar.date_input(
         label,
-        [completed_tasks.completed_date.min(), completed_tasks.completed_date.max()],
+        [
+            completed_tasks.completed_date.min(skipna=True),
+            completed_tasks.completed_date.max(skipna=True),
+        ],
     )
 
     completed_tasks = completed_tasks.loc[
@@ -50,7 +53,7 @@ def last_week_filter(completed_tasks: DataFrame, label: str) -> DataFrame:
         )
         completed_tasks = completed_tasks.loc[
             (
-                completed_tasks["completed_date"].dt.week
+                completed_tasks["completed_date"].dt.isocalendar().week
                 == completed_tasks["completed_date"].max().week
             )
             & (

@@ -1,70 +1,84 @@
 import time
-
 import numpy as np
 import pandas as pd
-import todoist
-
-from todoist_analytics.frontend.colorscale import color_code_to_hex
+import streamlit as st
+from todoist_api_python.api import TodoistAPI
+from todoist_analytics.backend.sync_api import TodoistSyncAPI
+from todoist_analytics.frontend.colorscale import color_name_to_hex
 
 
 class DataCollector:
     def __init__(self, token):
         self.token = token
-        self.items = pd.DataFrame()
-        self.projects = pd.DataFrame()
-        self.api = todoist.TodoistAPI(self.token)
-        self.api.sync()
+        self.sync_api = TodoistSyncAPI(token)
+        self.api = TodoistAPI(token)
         self.current_offset = 0
+        self.has_run_user_timezone_once = False
+
+    def get_all_projects(self):
+        return self.api.get_projects()
 
     def get_user_timezone(self):
-        self.tz = self.api.state["user"]["tz_info"]["timezone"]
-
-    def _collect_active_tasks(self):
-        pass
-
-    def _collect_completed_tasks(self, limit, offset):
-        data = self.api.completed.get_all(limit=limit, offset=offset)
-        if data == "Service Unavailable\n":
-            time.sleep(3)
-            data = self._collect_completed_tasks(limit, offset)
+        if self.has_run_user_timezone_once is False:
+            user = self.sync_api.get_users()
+            self.user_tz = user["user"]["tz_info"]["timezone"]
+            self.has_run_user_timezone_once = True
         else:
-            if len(data["items"]) != 0:
-                self._append_to_properties(data)
+            pass
+        return self.user_tz
 
-    def _append_to_properties(self, data):
-        preprocessed_items, preprocessed_projects = self._preprocess_completed_tasks(
+
+    def collect_completed_tasks(self, offset, items_df, batch_limit=200):
+        data = self.sync_api.get_completed_items(limit=batch_limit, offset=offset)
+        if data == None:
+            time.sleep(3)
+            self.collect_completed_tasks(batch_limit, offset, items_df)
+        elif len(data["items"]) != 0:
+            items_df = self.append_to_properties(data, items_df)
+        return items_df
+
+    def append_to_properties(self, data, items_df):
+        preprocessed_items = self.preprocess_completed_tasks(
             pd.DataFrame(data["items"]),
             pd.DataFrame.from_dict(data["projects"], orient="index"),
         )
-        self.items = self.items.append(preprocessed_items)
-        self.projects = self.projects.append(preprocessed_projects)
+        items_df = pd.concat([items_df, preprocessed_items])
+        return items_df
 
-    def _collect_all_completed_tasks(self, limit=10000):
+    def collect_all_completed_tasks(self, limit=2000):
         """
-        gets all the tasks and stores it
-        this function may take too long to complete and timeout,
-        a limit is set in order to prevent this
+        Gets all the tasks and stores them.
+        This function may take too long to complete and timeout,
+        so a limit is set to prevent this.
         """
+        items_df = pd.DataFrame()
         stop_collecting = False
         old_shape = 0
-
+        markdown_placeholder = st.empty()
         while not stop_collecting:
-            self._collect_completed_tasks(limit=200, offset=self.current_offset)
-            new_shape = self.items.shape[0]
+            items_df = self.collect_completed_tasks(self.current_offset, items_df)
+            new_shape = items_df.shape[0]
+            markdown_placeholder.write(f"Collected {new_shape} tasks, limit is {limit} tasks. (The API is slow)")
             if new_shape != old_shape and new_shape < limit:
                 old_shape = new_shape
-                self.current_offset += 200
+                self.current_offset = new_shape
             else:
                 self.current_offset = new_shape
                 stop_collecting = True
+        markdown_placeholder.empty()
 
-    def _state_to_dataframe(self, state, key):
-        f = [d.data for d in state[str(key)]]
-        f = pd.DataFrame(f)
-        return f
+        return items_df
 
-    def _collect_active_tasks(self):
-        self.active_tasks = self._state_to_dataframe(self.api.state, "items")
+    @staticmethod
+    def state_to_dataframe(state, key):
+        data = [d.data for d in state[str(key)]]
+        df = pd.DataFrame(data)
+        return df
+
+    def collect_active_tasks(self):
+        data = self.api.get_tasks()
+        active_tasks = self.state_to_dataframe(self.api.state, "items")
+        
         keep_columns = [
             "checked",
             "content",
@@ -77,53 +91,52 @@ class DataCollector:
             "date_added",
             "id",
         ]
-        self.active_tasks = self.active_tasks[keep_columns]
-        self.active_tasks = self.active_tasks.loc[self.active_tasks["checked"] == 0]
+        
+        active_tasks = data[keep_columns]
+        active_tasks = active_tasks.loc[active_tasks["checked"] == 0]
+        
+        return active_tasks
 
-    def _preprocess_completed_tasks(self, completed_tasks, projects):
-
-        projects = projects.rename({"id": "project_id"}, axis=1)
-
-        completed_tasks["datehour_completed"] = pd.to_datetime(
-            completed_tasks["completed_date"]
-        )
-
-        self.get_user_timezone()
-
-        completed_tasks["datehour_completed"] = pd.DatetimeIndex(
-            completed_tasks["datehour_completed"]
-        ).tz_convert(self.tz)
-        completed_tasks["completed_date"] = pd.to_datetime(
-            completed_tasks["datehour_completed"]
-        ).dt.date
-        completed_tasks["completed_date_weekday"] = pd.to_datetime(
-            completed_tasks["datehour_completed"]
-        ).dt.day_name()
+    def preprocess_completed_tasks(self, completed_tasks, projects):
+        completed_items_keep_columns = [
+            "completed_at",
+            "content",
+            "id",
+            "project_id",
+            "task_id",
+            "user_id",
+            "datehour_completed",
+            "completed_date",
+            "completed_date_weekday",
+            "project_name",
+            "color",
+            "isRecurrent",
+            "hex_color",
+        ]
+        
+        projects = projects.rename(columns={"id": "project_id"})
+        
+        completed_tasks["datehour_completed"] = pd.to_datetime(completed_tasks["completed_at"])
+        completed_tasks["datehour_completed"] = pd.DatetimeIndex(completed_tasks["datehour_completed"]).tz_convert(self.get_user_timezone())
+        completed_tasks["completed_date"] = pd.to_datetime(completed_tasks["datehour_completed"]).dt.date
+        completed_tasks["completed_date_weekday"] = pd.to_datetime(completed_tasks["datehour_completed"]).dt.day_name()
+        
         completed_tasks = completed_tasks.merge(
             projects[["project_id", "name", "color"]],
             how="left",
             left_on="project_id",
             right_on="project_id",
         )
-        completed_tasks = completed_tasks.rename({"name": "project_name"}, axis=1)
-
-        # creating the recurrent flag column -> not good implementation
-        completed_date_count = completed_tasks.groupby("task_id").agg(
-            {"completed_date": "nunique"}
-        )
-        completed_date_count["isRecurrent"] = np.where(
-            completed_date_count["completed_date"] > 1, 1, 0
-        )
+        
+        completed_tasks = completed_tasks.rename(columns={"name": "project_name"})
+        
+        completed_date_count = completed_tasks.groupby("task_id").agg({"completed_date": "nunique"})
+        completed_date_count["isRecurrent"] = np.where(completed_date_count["completed_date"] > 1, 1, 0)
         completed_date_count.drop(columns="completed_date", inplace=True)
-
-        completed_tasks = completed_tasks.merge(
-            completed_date_count, left_on="task_id", right_index=True
-        )
-
-        completed_tasks["hex_color"] = completed_tasks["color"].apply(
-            lambda x: color_code_to_hex[int(x)]["hex"]
-        )
-
-        completed_tasks = completed_tasks.drop_duplicates().reset_index(drop=True)
-
-        return completed_tasks, projects
+        
+        completed_tasks = completed_tasks.merge(completed_date_count, left_on="task_id", right_index=True)
+        
+        completed_tasks["hex_color"] = completed_tasks["color"].apply(lambda x: color_name_to_hex[x])
+        completed_tasks = completed_tasks[completed_items_keep_columns].drop_duplicates().dropna(subset=["completed_date"]).reset_index(drop=True)
+        
+        return completed_tasks
