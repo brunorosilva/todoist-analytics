@@ -76,24 +76,45 @@ class DataCollector:
         return df
 
     def collect_active_tasks(self):
-        data = self.api.get_tasks()
-        active_tasks = self.state_to_dataframe(self.api.state, "items")
+        """
+        Collects all active (uncompleted) tasks from Todoist.
         
-        keep_columns = [
-            "checked",
-            "content",
-            "added_by_uid",
-            "description",
-            "due",
-            "labels",
-            "priority",
-            "project_id",
-            "date_added",
-            "id",
-        ]
+        Returns:
+            DataFrame: A DataFrame containing all active tasks
+        """
+        # Get all tasks from the API
+        tasks = self.api.get_tasks()
         
-        active_tasks = data[keep_columns]
-        active_tasks = active_tasks.loc[active_tasks["checked"] == 0]
+        # Convert tasks to a DataFrame
+        tasks_data = []
+        for task in tasks:
+            task_dict = {
+                "id": task.id,
+                "content": task.content,
+                "description": task.description,
+                "project_id": task.project_id,
+                "priority": task.priority,
+                "labels": task.labels,
+                "due": task.due.date if task.due else None,
+                "date_added": task.created_at,
+                "checked": 0,  # All tasks from get_tasks are uncompleted
+            }
+            tasks_data.append(task_dict)
+        
+        # Create DataFrame
+        active_tasks = pd.DataFrame(tasks_data)
+        
+        # Get project names
+        projects = self.get_all_projects()
+        project_dict = {p.id: p.name for p in projects}
+        
+        # Add project names to the DataFrame
+        active_tasks["project_name"] = active_tasks["project_id"].map(project_dict)
+        
+        # Add hex colors for projects
+        project_colors = {p.id: p.color for p in projects}
+        active_tasks["color"] = active_tasks["project_id"].map(project_colors)
+        active_tasks["hex_color"] = active_tasks["color"].apply(lambda x: color_name_to_hex[x] if x in color_name_to_hex else "#808080")
         
         return active_tasks
 
@@ -105,7 +126,7 @@ class DataCollector:
             "project_id",
             "task_id",
             "user_id",
-            "datehour_completed",
+            "completed_datehour",
             "completed_date",
             "completed_date_weekday",
             "project_name",
@@ -116,10 +137,10 @@ class DataCollector:
         
         projects = projects.rename(columns={"id": "project_id"})
         
-        completed_tasks["datehour_completed"] = pd.to_datetime(completed_tasks["completed_at"])
-        completed_tasks["datehour_completed"] = pd.DatetimeIndex(completed_tasks["datehour_completed"]).tz_convert(self.get_user_timezone())
-        completed_tasks["completed_date"] = pd.to_datetime(completed_tasks["datehour_completed"]).dt.date
-        completed_tasks["completed_date_weekday"] = pd.to_datetime(completed_tasks["datehour_completed"]).dt.day_name()
+        completed_tasks["completed_datehour"] = pd.to_datetime(completed_tasks["completed_at"])
+        completed_tasks["completed_datehour"] = pd.DatetimeIndex(completed_tasks["completed_datehour"]).tz_convert(self.get_user_timezone())
+        completed_tasks["completed_date"] = pd.to_datetime(completed_tasks["completed_datehour"]).dt.date
+        completed_tasks["completed_date_weekday"] = pd.to_datetime(completed_tasks["completed_datehour"]).dt.day_name()
         
         completed_tasks = completed_tasks.merge(
             projects[["project_id", "name", "color"]],
