@@ -16,9 +16,8 @@ def create_color_palette(completed_tasks: DataFrame):
 def get_data(token):
     dc = DataCollector(token)
     completed_tasks = dc.collect_all_completed_tasks()
-    # dc._collect_active_tasks()
-    # active_tasks = dc.active_tasks
-    active_tasks = None
+    active_tasks = dc.collect_active_tasks()
+    # active_tasks = None
     return completed_tasks, active_tasks
 
 
