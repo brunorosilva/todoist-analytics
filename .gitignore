@@ -134,5 +134,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.streamlit/
-.devcontainer/
+.DS_Store
