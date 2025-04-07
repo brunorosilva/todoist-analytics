@@ -224,8 +224,6 @@ def create_app():
                         "overdue tasks" in point.lower()
                         and pain_points_data["overdue_tasks"]
                     ):
-                        # Create a unique key for the expander
-                        expander_key = f"overdue_tasks_expander_{i}"
 
                         # Create an expander for the overdue tasks
                         with st.expander("View Overdue Tasks", expanded=False):
@@ -263,8 +261,6 @@ def create_app():
 
                     # If this is the weekend tasks pain point and there are weekend tasks
                     if "weekend" in point.lower() and pain_points_data["weekend_tasks"]:
-                        # Create a unique key for the expander
-                        expander_key = f"weekend_tasks_expander_{i}"
 
                         # Create an expander for the weekend tasks
                         with st.expander("View Weekend Tasks", expanded=False):
@@ -297,9 +293,6 @@ def create_app():
                         "no due date" in point.lower()
                         and pain_points_data["active_tasks_no_due_date"]
                     ):
-                        # Create a unique key for the expander
-                        expander_key = f"active_tasks_no_due_date_expander_{i}"
-
                         # Create an expander for the active tasks with no due date
                         with st.expander(
                             "View Active Tasks with No Due Date", expanded=False

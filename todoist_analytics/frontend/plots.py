@@ -11,8 +11,6 @@ from plotly.colors import n_colors
 from plotly.missing_ipywidgets import FigureWidget
 from plotly_calplot import calplot
 
-from ..backend.utils import safe_divide
-
 
 def create_metrics_cards(completed_tasks: DataFrame, cols: list):
     cols[0].metric("completed tasks", len(completed_tasks))
@@ -571,9 +569,6 @@ def weekly_completion_trend_plot(completed_tasks: DataFrame) -> FigureWidget:
 
     # Calculate the start of the previous week
     start_of_prev_week = current_date - pd.Timedelta(weeks=1)
-
-    # Calculate the end of the next week
-    end_of_next_week = current_date + pd.Timedelta(weeks=1)
 
     # Filter completed tasks for the last 7 days
     last_7_days = completed_tasks[
