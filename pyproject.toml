@@ -18,6 +18,8 @@ requests = "^2.31.0"
 requests-mock = "^1.11.0"
 plotly-calplot = "^0.1.16"
 pandas = "^1.5.2"
+dotenv = "^0.9.9"
+kaleido = "0.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^5.2"

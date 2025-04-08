@@ -26,18 +26,13 @@ The main goal for this tool is to help you keep track and create analytics based
 - [x] Part 1: Getting the data
   
   Create an application that calls the Todoist API and gets all done and tbd tasks from an user
-- [ ] Part 2: Weekly review tab
-  
-  From the gattered data create a dashboard with info from the user's last week plus some insights
-- [ ] Part 3: Monthly review tab
-  
-  Personalized insights and monthly reviews (:
+- [x] Part 2: Weekly review tab
 
 --- Post-MVP ---
-- [ ] Part 4: Drop Streamlit
+- [ ] Part 3: Drop Streamlit
 Develop a Flask backend and a React frontend for better usage
 
-- [x] Part 5: Cloud it up
+- [x] Part 4: Cloud it up
 
 
 
