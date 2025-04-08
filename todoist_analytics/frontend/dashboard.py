@@ -48,19 +48,28 @@ def create_app():
             box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
         }
         .stTabs [data-baseweb="tab-list"] {
-            gap: 2rem;
+            gap: 1rem;
+            border-bottom: 1px solid rgba(250, 250, 250, 0.1);
         }
         .stTabs [data-baseweb="tab"] {
             height: 3rem;
             white-space: pre-wrap;
-            background-color: #f0f2f6;
-            border-radius: 0.5rem 0.5rem 0 0;
-            gap: 1rem;
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
+            background-color: transparent;
+            border-radius: 4px 4px 0 0;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            color: rgba(250, 250, 250, 0.7);
+            border: none;
+            transition: all 0.2s ease;
         }
         .stTabs [aria-selected="true"] {
-            background-color: #e0e2e6;
+            background-color: rgba(246, 51, 102, 0.1);
+            color: #f63366;
+            border-bottom: 2px solid #f63366;
+        }
+        .stTabs [data-baseweb="tab"]:hover {
+            background-color: rgba(49, 51, 63, 0.8);
+            color: #fafafa;
         }
         </style>
         """,
