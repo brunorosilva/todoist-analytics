@@ -3,6 +3,7 @@ import plotly.express as px
 import plotly.io as pio
 import streamlit as st
 from PIL import Image
+import hashlib
 
 from todoist_analytics.backend.auth import run_auth
 from todoist_analytics.backend.utils import create_color_palette, get_data
@@ -39,13 +40,15 @@ def create_app():
             padding-bottom: 2rem;
         }
         .stMetric {
-            background-color: #f0f2f6;
+            background-color: #31333F;
             padding: 1rem;
             border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.6);
         }
         .stMetric:hover {
-            box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.6);
+            background-color: #3a3d4d;
+            transition: all 0.3s ease;
         }
         .stTabs [data-baseweb="tab-list"] {
             gap: 1rem;
@@ -410,15 +413,50 @@ def create_app():
             )
 
             # Display the weekly review content
-            st.text_area("Weekly Review Content", weekly_review_content, height=500)
+            if 'weekly_review_content' not in st.session_state:
+                st.session_state.weekly_review_content = weekly_review_content
+                st.session_state.weekly_review_hash = hashlib.md5(weekly_review_content.encode()).hexdigest()
 
-            # Add a download button for the weekly review file
-            st.download_button(
-                label="Download Weekly Review",
-                data=weekly_review_content,
-                file_name=f"week{pd.Timestamp.now().isocalendar()[1]}.md",
-                mime="text/markdown",
+            edited_content = st.text_area(
+                "Create your own [weekly review](https://www.todoist.com/pt-BR/productivity-methods/weekly-review)",
+                st.session_state.weekly_review_content,
+                height=500,
+                key="weekly_review_editor"
             )
+            
+            # Update session state when content changes
+            current_hash = hashlib.md5(edited_content.encode()).hexdigest()
+            if current_hash != st.session_state.weekly_review_hash:
+                st.session_state.weekly_review_content = edited_content
+                st.session_state.weekly_review_hash = current_hash
+
+            # Create a row with download and preview buttons
+            col1, col2 = st.columns([1, 1])
+            
+            with col1:
+                # Add a download button for the weekly review file
+                st.download_button(
+                    label="Download Weekly Review",
+                    data=st.session_state.weekly_review_content,
+                    file_name=f"week{pd.Timestamp.now().isocalendar()[1]}.md",
+                    mime="text/markdown",
+                )
+            
+            with col2:
+                # Force update session state before showing preview
+                def on_preview_click():
+                    st.session_state.weekly_review_content = edited_content
+                    st.session_state.weekly_review_hash = current_hash
+                    st.session_state.show_preview = True
+                
+                preview = st.button("Preview Weekly Review", on_click=on_preview_click)
+
+            # Show preview if button is clicked
+            if st.session_state.get('show_preview', False):
+                st.markdown("---")
+                st.markdown("### Weekly Review Preview")
+                st.markdown(st.session_state.weekly_review_content)
+                st.session_state.show_preview = False
 
         # Settings tab
         with tab5:
